@@ -4436,12 +4436,13 @@
       renderCombo(id, val);
     }
 
-    // 발견자 이름 → 공정번호 역방향 매핑
+    // 발견자 이름 → 공정번호 역방향 매핑 (DB 매칭 정보 기준)
     function getWorkerProc(name) {
       if (!name) return '';
       const trimmed = name.trim();
-      for (const [proc, worker] of Object.entries(PROC_DEFAULT_WORKER)) {
-        if (worker && worker === trimmed) return proc;
+      // Proxy 객체는 Object.entries 가 안 되므로 실제 데이터인 dbMapping 사용
+      for (const [proc, worker] of Object.entries(dbMapping)) {
+        if (worker && worker.trim() === trimmed) return proc;
       }
       return '';
     }
@@ -4450,20 +4451,16 @@
     function autoSelectProcByFinder(name) {
       const proc = getWorkerProc(name);
       if (!proc) return;
-      // 발견공정 버튼 자동 선택 (비어있을 때만)
-      const foundProcEl = document.getElementById('f-found-proc');
-      if (!foundProcEl.value) {
-        const foundWrap = document.getElementById('proc-btns-found');
-        const btn = Array.from(foundWrap.querySelectorAll('.proc-btn')).find(b => b.dataset.num === proc);
-        if (btn) selectProc('found', proc, btn);
-      }
-      // 불량공정 버튼 자동 선택 (비어있을 때만)
-      const defectProcEl = document.getElementById('f-defect-proc');
-      if (!defectProcEl.value) {
-        const defectWrap = document.getElementById('proc-btns-defect');
-        const btn = Array.from(defectWrap.querySelectorAll('.proc-btn')).find(b => b.dataset.num === proc);
-        if (btn) selectProc('defect', proc, btn);
-      }
+
+      // 발견공정 버튼 자동 선택 (기존 선택 여부 관계없이 매칭된 공정으로 갱신)
+      const foundWrap = document.getElementById('proc-btns-found');
+      const foundBtn = Array.from(foundWrap.querySelectorAll('.proc-btn')).find(b => b.dataset.num === proc);
+      if (foundBtn) selectProc('found', proc, foundBtn);
+
+      // 불량공정 버튼 자동 선택
+      const defectWrap = document.getElementById('proc-btns-defect');
+      const defectBtn = Array.from(defectWrap.querySelectorAll('.proc-btn')).find(b => b.dataset.num === proc);
+      if (defectBtn) selectProc('defect', proc, defectBtn);
     }
 
     function selectCombo(id, val) {
