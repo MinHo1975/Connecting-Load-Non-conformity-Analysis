@@ -1903,6 +1903,44 @@
         break-before: page !important;
       }
 
+      /* ── AUTO INSIGHT 배너 인쇄 보정 ── */
+      .insight-banner {
+        background: #f0f9ff !important;
+        border: 1.5px solid #0369a1 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .insight-title {
+        color: #0369a1 !important;
+      }
+      /* 기본 태그 (파란 계열) */
+      .insight-tag {
+        background: #e0f2fe !important;
+        border: 1px solid #0284c7 !important;
+        color: #0c4a6e !important;
+        font-weight: 600 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      /* warn 태그 (주황) */
+      .insight-tag.warn {
+        background: #fef3c7 !important;
+        border-color: #d97706 !important;
+        color: #78350f !important;
+      }
+      /* danger 태그 (빨강) */
+      .insight-tag.danger {
+        background: #fee2e2 !important;
+        border-color: #dc2626 !important;
+        color: #7f1d1d !important;
+      }
+      /* ok 태그 (초록) */
+      .insight-tag.ok {
+        background: #d1fae5 !important;
+        border-color: #059669 !important;
+        color: #064e3b !important;
+      }
+
       /* 2페이지 끝: divider 다음 (kpi-grid 앞) */
       #kpi-grid {
         page-break-before: always !important;
