@@ -4237,10 +4237,19 @@ function handleRequest(e) {
       var prodQty = {};
       if (prodRows.length > 1) {
         for (var pi = 1; pi < prodRows.length; pi++) {
-          var pKey = String(prodRows[pi][0] || '').trim(); // ★ Sheets 자동 변환 방지
+          var rawKey = prodRows[pi][0];
+          var pKey = '';
+          // ★ Sheets가 "YYYY-MM" 문자열을 Date 객체로 자동 변환하는 문제 완전 차단
+          // Date 객체면 → Utilities.formatDate로 YYYY-MM 강제 복원
+          if (rawKey instanceof Date) {
+            pKey = Utilities.formatDate(rawKey, Session.getScriptTimeZone(), 'yyyy-MM');
+          } else {
+            pKey = String(rawKey || '').trim();
+          }
           var pData = prodRows[pi][1];
           var pTs   = prodRows[pi][2] || '';
-          if (!pKey) continue;
+          // YYYY-MM 형식이 아니면 건너뜀 (깨진 키 방어)
+          if (!pKey || !/^\d{4}-\d{2}$/.test(pKey)) continue;
           try {
             var parsed = JSON.parse(pData);
             parsed._updatedAt = pTs;
@@ -4282,7 +4291,11 @@ function handleRequest(e) {
             delete dataCopy._updatedAt;
             return [kStr, JSON.stringify(dataCopy), ts];
           });
-          prodSheet.getRange(2, 1, prodVals.length, 3).setValues(prodVals);
+          var dataRange = prodSheet.getRange(2, 1, prodVals.length, 3);
+          dataRange.setValues(prodVals);
+          // ★★★ 핵심 수정: key 컬럼(A열)을 plain text 서식으로 강제 지정
+          // → Sheets가 "2025-01"을 날짜로 자동변환하는 것을 영구 차단
+          prodSheet.getRange(2, 1, prodVals.length, 1).setNumberFormat('@STRING@');
         }
       }
       var defectCount = Array.isArray(bodyData.records)
@@ -4303,7 +4316,14 @@ function handleRequest(e) {
 
 function getOrCreateSheet(ss, name, headers) {
   var sheet = ss.getSheetByName(name);
-  if (!sheet) { sheet = ss.insertSheet(name); sheet.appendRow(headers); }
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.appendRow(headers);
+    // ★ ProdQty 시트: A열(key)을 plain text 서식으로 초기 설정 → 날짜 자동변환 차단
+    if (name === 'ProdQty') {
+      sheet.getRange('A:A').setNumberFormat('@STRING@');
+    }
+  }
   return sheet;
 }
 
@@ -8602,7 +8622,7 @@ function renderTypeChart() {
       s.style.cssText = 'display:block; padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:13px; font-weight:600; text-align:center; background:rgba(59,130,246,.12); border:1px solid rgba(59,130,246,.3); color:var(--accent,#3b82f6);';
       s.textContent = '⏳ 연결 테스트 중... (최대 10초 소요)';
       try {
-        const res = await fetch(url + '?action=ping', { method: 'GET' });
+        const res = await fetch(url + '?action=ping', { method: 'GET', redirect: 'follow' });
         const data = await res.json();
         if (data.ok) {
           s.style.cssText = 'display:block; padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:13px; font-weight:600; text-align:center; background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.3); color:var(--success);';
@@ -8706,16 +8726,32 @@ function renderTypeChart() {
     }
 
     // ★ prodQty 병합: 같은 key(년-월)는 updatedAt 비교, 없으면 remote 우선
+    // ★ remote의 key를 YYYY-MM으로 정규화하는 헬퍼
+    // GAS에서 Date 자동변환이 완전히 차단되지 않을 경우를 대비한 클라이언트 측 방어
+    function normalizeProdQtyKey(rawKey) {
+      const s = String(rawKey || '').trim();
+      if (/^\d{4}-\d{2}$/.test(s)) return s; // 이미 정상 형식
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        const y = d.getFullYear();
+        const mo = String(d.getMonth() + 1).padStart(2, '0');
+        return y + '-' + mo;
+      }
+      return null; // 변환 불가 → 버림
+    }
+
     function mergeProdQty(local, remote) {
       const merged = Object.assign({}, local);
-      Object.keys(remote).forEach(function (key) {
+      Object.keys(remote).forEach(function (rawKey) {
+        // ★ 클라이언트 측에서도 key를 YYYY-MM으로 정규화 (GAS Date 변환 최종 방어)
+        const key = normalizeProdQtyKey(rawKey);
+        if (!key) return;
         if (!merged[key]) {
-          merged[key] = remote[key];
+          merged[key] = remote[rawKey];
         } else {
-          // updatedAt 필드가 있으면 최신 데이터 우선
           const lTs = merged[key]._updatedAt || '';
-          const rTs = remote[key]._updatedAt || '';
-          if (rTs > lTs) merged[key] = remote[key];
+          const rTs = remote[rawKey]._updatedAt || '';
+          if (rTs > lTs) merged[key] = remote[rawKey];
         }
       });
       return merged;
@@ -8738,9 +8774,12 @@ function renderTypeChart() {
         } else {
           // STEP1: Pull
           toast('⏳ Google Sheets에서 데이터를 가져오는 중...', 'info');
-          const getRes = await fetch(_gsUrl + '?action=getAll', { method: 'GET' });
+          const getRes = await fetch(_gsUrl + '?action=getAll', { method: 'GET', redirect: 'follow' });
           if (!getRes.ok) throw new Error('서버 응답 오류: ' + getRes.status);
-          const remote = await getRes.json();
+          const rawGetText = await getRes.text();
+          let remote;
+          try { remote = JSON.parse(rawGetText); }
+          catch (je) { throw new Error('JSON 파싱 실패 — 응답: ' + rawGetText.slice(0, 80)); }
           if (remote.ok && remote.records) {
             records = mergeByUpdated(records, remote.records);
             await idbPutAll('records', records);
@@ -8788,9 +8827,13 @@ function renderTypeChart() {
       if (!confirm('Google Sheets에서 데이터를 불러옵니다.\n현재 앱의 데이터와 병합됩니다. 계속할까요?')) return;
       toast('⏳ Google Sheets에서 불러오는 중...', 'info');
       try {
-        const res = await fetch(_gsUrl + '?action=getAll', { method: 'GET' });
+        const res = await fetch(_gsUrl + '?action=getAll', { method: 'GET', redirect: 'follow' });
         if (!res.ok) throw new Error('서버 응답 오류: ' + res.status);
-        const data = await res.json();
+        // ★ JSON 파싱 실패 시 원문 텍스트 확인 후 오류 발생
+        const rawText = await res.text();
+        let data;
+        try { data = JSON.parse(rawText); }
+        catch (je) { throw new Error('JSON 파싱 실패 — 응답 미리보기: ' + rawText.slice(0, 80)); }
         if (!data.ok) throw new Error(data.msg || '응답 오류');
         records = mergeByUpdated(records, data.records || []);
         await idbPutAll('records', records);
@@ -8864,9 +8907,11 @@ function renderTypeChart() {
       if ((Date.now() - guardTs) < GS_DELETE_GUARD_MS) return;
       _gsInitialPulling = true; // ★ Pull 시작 — 이 기간 동안 gsAutoSync(Push) 차단
       try {
-        const res = await fetch(_gsUrl + '?action=getAll', { method: 'GET' });
+        const res = await fetch(_gsUrl + '?action=getAll', { method: 'GET', redirect: 'follow' });
         if (!res.ok) return;
-        const data = await res.json();
+        const rawText = await res.text();
+        let data;
+        try { data = JSON.parse(rawText); } catch (je) { console.warn('gsInitialPull JSON 파싱 실패:', rawText.slice(0, 80)); return; }
         if (!data.ok) return;
         // records 병합
         if (data.records && data.records.length) {
