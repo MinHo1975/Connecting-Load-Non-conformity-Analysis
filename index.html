@@ -230,6 +230,8 @@
       border-bottom: 2px solid transparent;
       transition: all .2s;
       white-space: nowrap;
+      flex-shrink: 0;
+      /* 탭 버튼이 찌그러지지 않게 설정 */
     }
 
     .tab-btn:hover {
@@ -248,13 +250,25 @@
     .tab-badge {
       background: var(--accent);
       color: #fff;
-      font-size: 10px;
-      font-family: var(--mono);
-      font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 10px;
-      min-width: 18px;
-      text-align: center;
+      font-size: 11.5px;
+      /* 약간 더 크게 */
+      font-family: var(--font);
+      font-weight: 800;
+      padding: 0 8px;
+      border-radius: 20px;
+      /* 더 둥글게 */
+      min-width: 24px;
+      /* 최소 너비 확장 */
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      /* 그림자 강화 */
+      margin-left: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      /* 미세한 테두리 추가 */
     }
 
     /* ── MAIN CONTENT ── */
@@ -1908,6 +1922,146 @@
       }
 
       /* 도넛 카드 내부 레이아웃 인쇄 시 flex 유지 */
+      /* 히트맵 인쇄 시 배경색 강제 출력 */
+      .heatmap-cell,
+      .heatmap-legend-cell {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      /* ── 인쇄 시 글자 가독성 보정 ── */
+
+      /* 1. 부적합 유형별 TOP 차트: Y축 레이블 (공정명) 어두운 색으로 */
+      /* Chart.js 캔버스는 CSS로 직접 제어 불가 → beforeprint 이벤트로 처리 */
+
+      /* 2. PPM 게이지: 보조 텍스트 어둡게 */
+      #gauge-period-text {
+        fill: #1e293b !important;
+      }
+      /* 게이지 중앙 PPM 수치 (SVG text) - 흰 종이에서 보이도록 */
+      #gauge-pct-text {
+        fill: #0f172a !important;
+      }
+      #gauge-sub {
+        color: #1e293b !important;
+        font-weight: 600 !important;
+      }
+      .gauge-leg-item {
+        color: #1e293b !important;
+        font-weight: 600 !important;
+      }
+      /* 게이지 범례 동그라미 - 배경색 강제 출력 */
+      .gauge-leg-dot {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        border: 1px solid rgba(0,0,0,0.15) !important;
+      }
+      /* 게이지 배경 반원을 인쇄 시 연회색으로 */
+      #dash-gauge-svg path[stroke="rgba(30,58,95,0.8)"] {
+        stroke: #cbd5e1 !important;
+      }
+
+      /* 3. 히트맵 셀 내 숫자: 흰색→검정으로 */
+      .heatmap-cell {
+        color: #1e293b !important;
+        font-weight: 700 !important;
+        text-shadow: none !important;
+      }
+      /* 히트맵 라벨(공정명·월) 어둡게 */
+      .heatmap-label {
+        color: #1e293b !important;
+      }
+
+      /* ── 인쇄 시 글자 가독성 보정 ── */
+
+      /* [PPM 게이지] 보조 텍스트 어둡게 (중복 블록) */
+      #gauge-period-text {
+        fill: #1e293b !important;
+      }
+      #gauge-pct-text {
+        fill: #0f172a !important;
+      }
+      #gauge-sub {
+        color: #1e293b !important;
+        font-weight: 600 !important;
+      }
+      .gauge-leg-item {
+        color: #1e293b !important;
+        font-weight: 600 !important;
+      }
+
+      /* [히트맵] 셀 내 숫자 흰색→진한 색, 라벨 어둡게 */
+      .heatmap-cell {
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        text-shadow: none !important;
+      }
+      .heatmap-label {
+        color: #0f172a !important;
+      }
+
+      /* 대시보드 KPI 카드 - 인쇄 시 흰 배경으로 전환 */
+      .dash-kpi {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      /* 상단 색상 바 (::before 가상요소 인쇄 불가 → border-top 대체) */
+      .dash-kpi::before {
+        display: none !important;
+      }
+      .dash-kpi.c1 {
+        border-top: 4px solid #0ea5e9 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .dash-kpi.c2 {
+        border-top: 4px solid #ef4444 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .dash-kpi.c3 {
+        border-top: 4px solid #f59e0b !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .dash-kpi.c4 {
+        border-top: 4px solid #10b981 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .dash-kpi.c5 {
+        border-top: 4px solid #8b5cf6 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* 카드 내 텍스트 - 흰 배경 기준으로 진한 색 적용 */
+      /* 상단 아이콘+레이블 (예: 총 불량수량, 가공불량 합계...) */
+      .dash-kpi-label {
+        color: #374151 !important;
+        font-weight: 700 !important;
+        font-size: 11px !important;
+      }
+      /* 큰 숫자 옆 단위 (개, PPM...) */
+      .dash-kpi-val span {
+        color: #374151 !important;
+        font-weight: 600 !important;
+      }
+      /* 하단 보조 텍스트 (예: 26년 4월, 소재불량 제외, 목표 220 PPM...) */
+      .dash-kpi-sub {
+        color: #374151 !important;
+        font-weight: 600 !important;
+        font-size: 11px !important;
+      }
+      /* 큰 숫자 자체도 확실하게 */
+      .dash-kpi-val {
+        color: #0f172a !important;
+        font-weight: 800 !important;
+      }
+
       /* 워터마크 */
       #print-watermark {
         display: block !important;
@@ -2101,7 +2255,9 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      flex-shrink: 0
+      flex-shrink: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     /* ── HEATMAP ── */
@@ -2845,6 +3001,10 @@
     <button class="tab-btn active" onclick="switchTab('tab-entry')" id="tbtn-entry">
       <span class="tab-icon">✏️</span> 데이터 입력
     </button>
+    <button class="tab-btn" onclick="switchTab('tab-production')" id="tbtn-production">
+      <span class="tab-icon">🏭</span> <span id="tbtn-production-label">공정별 총생산수량</span>
+      <span class="tab-badge" id="badge-production">0</span>
+    </button>
     <button class="tab-btn" onclick="switchTab('tab-list')" id="tbtn-list">
       <span class="tab-icon">📋</span> 이력 대장
       <span class="tab-badge" id="badge-list">0</span>
@@ -3066,6 +3226,124 @@
             </thead>
             <tbody id="recent-tbody"></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: 공정별 총생산수량 ═══ -->
+    <div id="tab-production" class="tab-panel">
+      <div style="display:flex;gap:0;height:calc(100vh - 110px);overflow:hidden;">
+
+        <!-- ── 왼쪽: 입력란 ── -->
+        <div
+          style="width:500px; flex-shrink:0; border-right:2px solid var(--border); overflow-y:auto; padding:20px 15px;">
+          <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:14px;">📝 공정별 총생산수량 입력</div>
+
+          <!-- 날짜 선택 (달력 팝업, 버튼 없음) -->
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">년·월 선택 <span
+                style="color:var(--danger)">*</span></label>
+            <div class="cal-wrap" style="position:relative;">
+              <input type="text" class="f-input" id="prod-ym-input" placeholder="예) 26년 12월" readonly
+                style="cursor:pointer;flex:1;" onclick="toggleProdCal()">
+              <div class="cal-popup" id="cal-prod-ym" style="z-index:600;">
+                <div class="cal-nav">
+                  <button onclick="prodYmNavYear(-1)">‹‹</button>
+                  <div class="cal-title" id="prod-ym-title">2026년</div>
+                  <button onclick="prodYmNavYear(1)">››</button>
+                </div>
+                <div class="ym-grid" id="prod-ym-months"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 공정별 입력 테이블 -->
+          <div id="prod-input-title" style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px;">공정별
+            총생산수량</div>
+          <table style="width:100%; border-collapse:collapse; font-size:13px; min-width:auto;">
+            <thead>
+              <tr style="background:var(--bg2);border-bottom:2px solid var(--accent);">
+                <th style="padding:6px 8px;text-align:center;color:var(--text2);font-weight:600;width:100px;">▼공정순서</th>
+                <th style="padding:6px 8px;text-align:center;color:var(--text2);font-weight:600;width:120px;">▼총생산수량
+                </th>
+                <th style="padding:6px 8px;text-align:center;color:var(--text2);font-weight:600;">▼비고</th>
+              </tr>
+            </thead>
+            <tbody id="prod-input-tbody">
+              <!-- JS로 동적 생성 -->
+            </tbody>
+          </table>
+
+          <!-- 대동DPP 참고 영역 + 버튼 같은 행 -->
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:flex-start;">
+            <div
+              style="flex:0 0 60%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;border-left:3px solid #f59e0b;">
+              <div style="font-size:11.5px;font-weight:700;color:#f59e0b;margin-bottom:6px;">▲대동DPP참고</div>
+              <div style="font-size:12px;color:var(--text2);margin-bottom:4px;">
+                <span
+                  style="user-select:text;cursor:text;background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:monospace;color:#60a5fa;font-weight:600;">F6800-2201
+                  (1,2)</span>
+              </div>
+              <div style="font-size:11px;color:#fbbf24;line-height:1.5;">
+                ☆23.11월 설변에 의한 끝번호 변경-()앞 까지 복사 후 조회요.
+              </div>
+              <div style="font-size:11px;color:var(--text2);line-height:1.5;margin-top:2px;">
+                ※대동DPP &gt; 물류관리 &gt; 입고관리 &gt; 년월별 입고현황 &gt; 도번 &gt; 조회
+              </div>
+            </div>
+            <!-- 저장/초기화 버튼 세로 배치 -->
+            <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+              <button id="prod-save-btn" class="btn btn-primary" style="width:100%;" onclick="saveProdData()">💾
+                저장</button>
+              <button class="btn btn-ghost" style="width:100%;" onclick="clearProdInputs(true)">🗑 초기화</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── 오른쪽: 이력 대장 ── -->
+        <div style="flex:1; overflow-y:auto; padding:20px 18px;">
+          <!-- 이력 대장 헤더 + 엑셀 버튼 한 줄 -->
+          <div
+            style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap;">
+            <div style="font-size:15px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:10px;">
+              <span id="prod-ledger-title">📋 총생산수량 이력 대장</span>
+              <div style="display:flex;gap:5px;align-items:center;margin-left:10px;">
+                <select id="prod-filter-year" class="f-input" style="width:90px;padding:4px 8px;font-size:12px;"
+                  onchange="renderProdLedger()">
+                  <option value="">년도 전체</option>
+                </select>
+                <select id="prod-filter-month" class="f-input" style="width:80px;padding:4px 8px;font-size:12px;"
+                  onchange="renderProdLedger()">
+                  <option value="">월 전체</option>
+                  <option value="1">1월</option>
+                  <option value="2">2월</option>
+                  <option value="3">3월</option>
+                  <option value="4">4월</option>
+                  <option value="5">5월</option>
+                  <option value="6">6월</option>
+                  <option value="7">7월</option>
+                  <option value="8">8월</option>
+                  <option value="9">9월</option>
+                  <option value="10">10월</option>
+                  <option value="11">11월</option>
+                  <option value="12">12월</option>
+                </select>
+                <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;"
+                  onclick="resetProdFilter()">초기화</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+              <button class="btn btn-danger btn-sm" onclick="clearAllProdData()">🗑 전체 자료 삭제</button>
+              <button class="btn btn-success btn-sm" onclick="exportProdExcel()">📊 엑셀 내려받기</button>
+              <button class="btn btn-warn btn-sm" onclick="document.getElementById('prod-import-file').click()">📂
+                자료등록(엑셀)</button>
+              <input type="file" id="prod-import-file" accept=".xlsx,.xls" style="display:none"
+                onchange="importProdExcel(this)">
+            </div>
+          </div>
+          <div id="prod-ledger-wrap">
+            <div style="text-align:center;color:var(--text3);padding:40px 0;font-size:13px;">저장된 데이터가 없습니다.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -3292,13 +3570,13 @@
         <div class="filter-row" style="gap:10px;flex-wrap:wrap">
           <div class="filter-group" style="min-width:120px">
             <label>년도</label>
-            <select class="f-input" id="kpi-year" onchange="renderKpi()">
+            <select class="f-input" id="kpi-year" onchange="renderKpi(); renderGauge(); renderRadarChart();">
               <option value="">전체</option>
             </select>
           </div>
           <div class="filter-group" style="min-width:100px">
             <label>월</label>
-            <select class="f-input" id="kpi-month" onchange="ppmSelectedMonth=''; renderKpi();">
+            <select class="f-input" id="kpi-month" onchange="selectPpmMonth(''); renderKpi(); renderGauge(); renderRadarChart(); renderPpmChart();">
               <option value="">전체</option>
               <option value="1월">1월</option>
               <option value="2월">2월</option>
@@ -3380,16 +3658,31 @@
               <span class="dash-card-title">🏷 부적합 유형별 가공불량 수량 TOP</span>
               <div class="dash-filter-row">
                 <label style="font-size:11px;color:var(--text3)">표시 건수</label>
-                <select class="f-input" id="dash-top-n" onchange="renderDashboard()"
+                <select class="f-input" id="dash-top-n" onchange="renderTypeChart()"
                   style="width:70px;padding:4px 8px;font-size:12px">
                   <option value="5">TOP 5</option>
                   <option value="10" selected>TOP 10</option>
                   <option value="0">전체</option>
                 </select>
                 <label style="font-size:11px;color:var(--text3)">년도</label>
-                <select class="f-input" id="dash-type-year" onchange="renderDashboard()"
-                  style="width:90px;padding:4px 8px;font-size:12px">
+                <select class="f-input" id="dash-type-year" onchange="this.setAttribute('data-user-set','1');renderTypeChart()" style="width:80px;padding:4px 8px;font-size:12px">
                   <option value="">전체</option>
+                </select>
+                <label style="font-size:11px;color:var(--text3)">월도</label>
+                <select class="f-input" id="dash-type-month" onchange="this.setAttribute('data-user-set','1');renderTypeChart()" style="width:80px;padding:4px 8px;font-size:12px">
+                  <option value="">전체</option>
+                  <option value="1월">1월</option>
+                  <option value="2월">2월</option>
+                  <option value="3월">3월</option>
+                  <option value="4월">4월</option>
+                  <option value="5월">5월</option>
+                  <option value="6월">6월</option>
+                  <option value="7월">7월</option>
+                  <option value="8월">8월</option>
+                  <option value="9월">9월</option>
+                  <option value="10월">10월</option>
+                  <option value="11월">11월</option>
+                  <option value="12월">12월</option>
                 </select>
               </div>
             </div>
@@ -3425,6 +3718,7 @@
           <div class="dash-card">
             <div class="dash-card-hdr">
               <span class="dash-card-title">🎯 PPM 목표 달성률</span>
+              <span id="gauge-period-header" style="font-size:10px;color:var(--text3)">전체</span>
             </div>
             <div id="dash-gauge-wrap" class="gauge-wrap">
               <svg class="gauge-svg" id="dash-gauge-svg" viewBox="0 0 200 110">
@@ -3440,7 +3734,7 @@
                 <!-- 수치 텍스트 -->
                 <text id="gauge-pct-text" x="100" y="88" text-anchor="middle" class="gauge-val" font-size="26"
                   fill="#e2e8f0" font-family="'JetBrains Mono',monospace" font-weight="700">-</text>
-                <text x="100" y="103" text-anchor="middle" fill="#64748b" font-size="10"
+                <text id="gauge-period-text" x="100" y="103" text-anchor="middle" fill="#64748b" font-size="10"
                   font-family="'Noto Sans KR',sans-serif">올해 누적 PPM (목표 220)</text>
               </svg>
               <div class="gauge-legend">
@@ -3462,7 +3756,7 @@
           <div class="dash-card">
             <div class="dash-card-hdr">
               <span class="dash-card-title">🕸 발견공정별 불량 레이더</span>
-              <span style="font-size:10px;color:var(--text3)">올해 vs 전년</span>
+              <span id="radar-period-label" style="font-size:10px;color:var(--text3)">올해 vs 전년</span>
             </div>
             <div style="position:relative;height:220px">
               <canvas id="dash-radar-chart"></canvas>
@@ -3489,7 +3783,7 @@
             <div class="dash-card-hdr">
               <span class="dash-card-title">🔥 발견공정 × 월별 불량 히트맵 (가공불량 수량)</span>
               <div class="dash-filter-row">
-                <select class="f-input" id="dash-heatmap-year" onchange="renderHeatmap()"
+                <select class="f-input" id="dash-heatmap-year" onchange="this.setAttribute('data-user-set','1');renderHeatmap()"
                   style="width:90px;padding:4px 8px;font-size:12px">
                   <option value="">전체</option>
                 </select>
@@ -3891,64 +4185,134 @@
             <button class="btn btn-ghost" onclick="copyGasCode()" style="margin-bottom:10px; font-size:12px;">📋 Apps
               Script 코드 복사</button>
             <div id="gas-code-block"
-              style="background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:10px; font-size:11px; font-family:monospace; white-space:pre; overflow-x:auto; max-height:200px; overflow-y:auto; color:var(--text1);">
-              // ★ 커넥팅로드 부적합품이력관리 — Apps Script v3.0
-              // ping 응답: {ok:true, msg:'...'} 형식 (대출관리대장 호환)
-              // saveAll 전체 덮어쓰기 (삭제 완전 반영)
+              style="background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:10px; font-size:11px; font-family:monospace; white-space:pre; overflow-x:auto; max-height:200px; overflow-y:auto; color:var(--text1);">// ★ 커넥팅로드 부적합품이력관리 — Apps Script v4.0
+// 변경: 총생산수량(prodQty) 시트 연동 추가
+//   - Records 시트: 부적합품 이력 (기존)
+//   - ProdQty  시트: 공정별 총생산수량 (신규)
 
-              var HEADERS = ['id','ym','year','month','date','finder','foundProc',
-              'machQty','matQty','defectProc','defectCode',
-              'defectContent','worker','bushMach','bushSup',
-              'bolt','createdAt','updatedAt'];
+var DEFECT_HEADERS = ['id','ym','year','month','date','finder','foundProc',
+  'machQty','matQty','defectProc','defectCode',
+  'defectContent','worker','bushMach','bushSup',
+  'bolt','createdAt','updatedAt'];
 
-              function handleRequest(e) {
-              try {
-              var action = (e.parameter && e.parameter.action) ? e.parameter.action : '';
-              var bodyData = null;
-              if (e.postData && e.postData.contents) {
-              try { bodyData = JSON.parse(e.postData.contents); } catch(err) {}
-              if (bodyData && bodyData.action) action = bodyData.action;
-              }
-              if (action === 'ping') {
-              return ok({ok: true, msg: '커넥팅로드 부적합 관리 — Apps Script 정상 작동 중'});
-              }
-              var ss = SpreadsheetApp.getActiveSpreadsheet();
-              var sheet = getOrCreateSheet(ss, 'Records', HEADERS);
-              if (action === 'getAll') {
-              var rows = sheet.getDataRange().getValues();
-              var result = [];
-              if (rows.length > 1) {
-              var hdrs = rows[0];
-              for (var i = 1; i < rows.length; i++) { if (!rows[i][0]) continue; var obj={}; for (var j=0; j <
-                hdrs.length; j++) { obj[hdrs[j]]=rows[i][j] !==undefined ? rows[i][j] : '' ; } result.push(obj); } }
-                return ok({ok: true, records: result}); } if (action==='saveAll' && bodyData &&
-                Array.isArray(bodyData.records)) { sheet.clearContents(); sheet.appendRow(HEADERS); var
-                toWrite=bodyData.records.filter(function(r){ return !!r.id; }); if (toWrite.length> 0) {
-                var vals = toWrite.map(function(obj) {
-                return HEADERS.map(function(h) {
-                return obj[h] !== undefined && obj[h] !== null ? obj[h] : '';
-                });
-                });
-                sheet.getRange(2, 1, vals.length, HEADERS.length).setValues(vals);
-                }
-                return ok({ok: true, count: toWrite.length, msg: toWrite.length + '건 저장 완료'});
-                }
-                return ok({ok: false, msg: 'Invalid action: ' + action});
-                } catch(err) {
-                return ok({ok: false, msg: err.toString()});
-                }
-                }
-                function getOrCreateSheet(ss, name, headers) {
-                var sheet = ss.getSheetByName(name);
-                if (!sheet) { sheet = ss.insertSheet(name); sheet.appendRow(headers); }
-                return sheet;
-                }
-                function ok(obj) {
-                return ContentService.createTextOutput(JSON.stringify(obj))
-                .setMimeType(ContentService.MimeType.JSON);
-                }
-                function doGet(e) { return handleRequest(e); }
-                function doPost(e) { return handleRequest(e); }</div>
+// ProdQty 시트 컬럼: key(년-월 식별자) + JSON 직렬화된 데이터
+var PROD_HEADERS = ['key', 'data', '_updatedAt'];
+
+function handleRequest(e) {
+  try {
+    var action = (e.parameter && e.parameter.action) ? e.parameter.action : '';
+    var bodyData = null;
+    if (e.postData && e.postData.contents) {
+      try { bodyData = JSON.parse(e.postData.contents); } catch(err) {}
+      if (bodyData && bodyData.action) action = bodyData.action;
+    }
+
+    // ── ping ──
+    if (action === 'ping') {
+      return ok({ok: true, msg: '커넥팅로드 부적합 관리 — Apps Script v4.0 정상 작동 중'});
+    }
+
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var defectSheet = getOrCreateSheet(ss, 'Records', DEFECT_HEADERS);
+    var prodSheet   = getOrCreateSheet(ss, 'ProdQty',  PROD_HEADERS);
+
+    // ── getAll: 부적합이력 + 총생산수량 동시 반환 ──
+    if (action === 'getAll') {
+      // 부적합 이력 읽기
+      var defectRows = defectSheet.getDataRange().getValues();
+      var records = [];
+      if (defectRows.length > 1) {
+        var hdrs = defectRows[0];
+        for (var i = 1; i < defectRows.length; i++) {
+          if (!defectRows[i][0]) continue;
+          var obj = {};
+          for (var j = 0; j < hdrs.length; j++) {
+            obj[hdrs[j]] = defectRows[i][j] !== undefined ? defectRows[i][j] : '';
+          }
+          records.push(obj);
+        }
+      }
+      // 총생산수량 읽기 → {key: data} 객체로 변환
+      var prodRows = prodSheet.getDataRange().getValues();
+      var prodQty = {};
+      if (prodRows.length > 1) {
+        for (var pi = 1; pi < prodRows.length; pi++) {
+          var pKey = prodRows[pi][0];
+          var pData = prodRows[pi][1];
+          var pTs   = prodRows[pi][2] || '';
+          if (!pKey) continue;
+          try {
+            var parsed = JSON.parse(pData);
+            parsed._updatedAt = pTs;
+            prodQty[pKey] = parsed;
+          } catch(pe) {}
+        }
+      }
+      return ok({ok: true, records: records, prodQty: prodQty});
+    }
+
+    // ── saveAll: 부적합이력 + 총생산수량 동시 저장 ──
+    if (action === 'saveAll' && bodyData) {
+      // 부적합 이력 저장
+      if (Array.isArray(bodyData.records)) {
+        defectSheet.clearContents();
+        defectSheet.appendRow(DEFECT_HEADERS);
+        var toWrite = bodyData.records.filter(function(r) { return !!r.id; });
+        if (toWrite.length > 0) {
+          var vals = toWrite.map(function(obj) {
+            return DEFECT_HEADERS.map(function(h) {
+              return obj[h] !== undefined && obj[h] !== null ? obj[h] : '';
+            });
+          });
+          defectSheet.getRange(2, 1, vals.length, DEFECT_HEADERS.length).setValues(vals);
+        }
+      }
+      // 총생산수량 저장 (key별로 행 Upsert)
+      if (bodyData.prodQty && typeof bodyData.prodQty === 'object') {
+        prodSheet.clearContents();
+        prodSheet.appendRow(PROD_HEADERS);
+        var prodKeys = Object.keys(bodyData.prodQty);
+        if (prodKeys.length > 0) {
+          var prodVals = prodKeys.map(function(k) {
+            var entry = bodyData.prodQty[k];
+            var ts = entry._updatedAt || new Date().toISOString();
+            // _updatedAt 필드는 data JSON에서 제외하여 저장
+            var dataCopy = JSON.parse(JSON.stringify(entry));
+            delete dataCopy._updatedAt;
+            return [k, JSON.stringify(dataCopy), ts];
+          });
+          prodSheet.getRange(2, 1, prodVals.length, 3).setValues(prodVals);
+        }
+      }
+      var defectCount = Array.isArray(bodyData.records)
+        ? bodyData.records.filter(function(r){ return !!r.id; }).length : 0;
+      var prodCount = bodyData.prodQty ? Object.keys(bodyData.prodQty).length : 0;
+      return ok({
+        ok: true,
+        count: defectCount,
+        msg: '부적합 ' + defectCount + '건 + 생산수량 ' + prodCount + '개월 저장 완료'
+      });
+    }
+
+    return ok({ok: false, msg: 'Invalid action: ' + action});
+  } catch(err) {
+    return ok({ok: false, msg: err.toString()});
+  }
+}
+
+function getOrCreateSheet(ss, name, headers) {
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) { sheet = ss.insertSheet(name); sheet.appendRow(headers); }
+  return sheet;
+}
+
+function ok(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e)  { return handleRequest(e); }
+function doPost(e) { return handleRequest(e); }</div>
             <br>
             <div style="color:var(--accent2); font-weight:700; margin-bottom:6px;">🔵 STEP 3 — 웹앱으로 배포</div>
             4. [배포] → [새 배포] → 유형: <strong>웹앱</strong><br>
@@ -4161,6 +4525,516 @@
     let recentSortDir = 1;        // 1: 오름차순, -1: 내림차순
     let activeCombo = null;
 
+    // ── Production (공정별 총생산수량) state ──
+    let prodYear = new Date().getFullYear();
+    let prodSelYear = null;
+    let prodSelMonth = null;
+
+    const PROC_LIST = [30, 40, 50, 60, 70, 80, 100, 110, 120, 130, 140, 160, 180];
+
+    // 캘린더 토글 (버튼 없이 input 클릭으로만)
+    function toggleProdCal() {
+      closeAllCals();
+      const el = document.getElementById('cal-prod-ym');
+      if (!el) return;
+      el.classList.toggle('open');
+      if (el.classList.contains('open')) renderProdYmCal();
+    }
+
+    function renderProdYmCal() {
+      document.getElementById('prod-ym-title').textContent = prodYear + '년';
+      const grid = document.getElementById('prod-ym-months');
+      grid.innerHTML = MONTHS.map((m, i) => {
+        const sel = prodSelYear === prodYear && prodSelMonth === i + 1;
+        return '<div class="ym-item' + (sel ? ' sel' : '') + '" onclick="selectProdYm(' + (i + 1) + ')">' + m + '</div>';
+      }).join('');
+    }
+
+    function prodYmNavYear(d) { prodYear += d; renderProdYmCal(); }
+
+    function selectProdYm(month) {
+      prodSelYear = prodYear;
+      prodSelMonth = month;
+      const sy = String(prodYear).slice(-2);
+      document.getElementById('prod-ym-input').value = sy + '년 ' + month + '월';
+      closeAllCals();
+      updateProdInputTitle();
+
+      // 날짜 선택 시 기존 데이터를 불러오지 않고 입력란을 비웁니다.
+      // (기존 데이터를 수정하려면 이력 대장의 '수정' 버튼을 클릭해야 함)
+      clearProdInputs(false);
+
+      // 저장 버튼 명칭을 '저장'으로 초기화
+      const saveBtn = document.getElementById('prod-save-btn');
+      if (saveBtn) saveBtn.innerHTML = '💾 저장';
+    }
+
+    // 입력란 상단 제목 업데이트 (탭 이름은 변경 안 함)
+    function updateProdInputTitle() {
+      const el = document.getElementById('prod-input-title');
+      if (!el) return;
+      if (prodSelYear && prodSelMonth) {
+        const sy = String(prodSelYear).slice(-2);
+        el.textContent = sy + '년 ' + prodSelMonth + '월 공정별 총생산수량';
+      } else {
+        el.textContent = '공정별 총생산수량';
+      }
+    }
+
+    // 해당 월 저장 데이터 입력란에 로드
+    function loadProdData() {
+      if (!prodSelYear || !prodSelMonth) return;
+      const key = prodSelYear + '-' + String(prodSelMonth).padStart(2, '0');
+      let store = {};
+      try { store = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+      const monthData = store[key] || {};
+      PROC_LIST.forEach(p => {
+        const qEl = document.getElementById('prod-qty-' + p);
+        const nEl = document.getElementById('prod-note-' + p);
+        if (!qEl || !nEl) return;
+
+        const data = monthData[p];
+        if (typeof data === 'object' && data !== null) {
+          qEl.value = (data.qty != null) ? Number(data.qty).toLocaleString('ko-KR') : '';
+          nEl.value = data.note || '';
+        } else {
+          // 호환성: 기존 숫자 데이터 처리
+          qEl.value = (data != null) ? Number(data).toLocaleString('ko-KR') : '';
+          nEl.value = '';
+        }
+      });
+    }
+
+    // 공정 입력 행 생성
+    function buildProdInputRows() {
+      const tbody = document.getElementById('prod-input-tbody');
+      if (!tbody) return;
+      const PROC_LABELS = { 30: '30 (20공정)', 180: '180 (대동DPP참고)' };
+      tbody.innerHTML = PROC_LIST.map(p => `
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:5px 6px;text-align:center;font-weight:600;color:var(--text1);white-space:nowrap;font-size:12px;width:100px;">${PROC_LABELS[p] || p}</td>
+          <td style="padding:3px 4px;width:120px;">
+            <input type="text" class="f-input" id="prod-qty-${p}" placeholder="0"
+              style="text-align:right;width:100%;padding:4px 6px;font-size:12px;"
+              oninput="fmtThousands(this)"
+              onkeydown="moveProdRow(event,${p},'qty')">
+          </td>
+          <td style="padding:3px 4px;">
+            <input type="text" class="f-input" id="prod-note-${p}" placeholder="비고 입력"
+              style="width:100%;padding:4px 6px;font-size:12px;"
+              onkeydown="moveProdRow(event,${p},'note')">
+          </td>
+        </tr>`).join('');
+    }
+
+    // 천단위 구분기호
+    function fmtThousands(el) {
+      let raw = el.value.replace(/[^0-9]/g, '');
+      el.value = raw ? Number(raw).toLocaleString('ko-KR') : '';
+    }
+
+    // Enter/방향키로 다음 행 이동
+    function moveProdRow(e, curProc, type) {
+      if (e.key === 'Enter' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const idx = PROC_LIST.indexOf(curProc);
+        if (idx < PROC_LIST.length - 1) {
+          document.getElementById('prod-qty-' + PROC_LIST[idx + 1])?.focus();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const idx = PROC_LIST.indexOf(curProc);
+        if (idx > 0) {
+          document.getElementById('prod-qty-' + PROC_LIST[idx - 1])?.focus();
+        }
+      }
+    }
+
+    // 저장 (공정순서 + 총생산수량 모두 저장)
+    function saveProdData() {
+      if (!prodSelYear || !prodSelMonth) {
+        toast('년·월을 먼저 선택해주세요.', 'warn'); return;
+      }
+      const key = prodSelYear + '-' + String(prodSelMonth).padStart(2, '0');
+      const data = {};
+      PROC_LIST.forEach(p => {
+        const qEl = document.getElementById('prod-qty-' + p);
+        const nEl = document.getElementById('prod-note-' + p);
+        const rawQ = qEl ? qEl.value.replace(/,/g, '').trim() : '';
+        const rawN = nEl ? nEl.value.trim() : '';
+        data[p] = {
+          qty: (rawQ !== '' && !isNaN(rawQ)) ? parseInt(rawQ) : null,
+          note: rawN || ''
+        };
+      });
+      // ★ 병합 비교용 타임스탬프 추가
+      data._updatedAt = new Date().toISOString();
+      let store = {};
+      try { store = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+      store[key] = data;
+      localStorage.setItem('prodQty', JSON.stringify(store));
+      const sy = String(prodSelYear).slice(-2);
+      toast(sy + '년 ' + prodSelMonth + '월 총생산수량 저장 완료! ✅', 'success');
+
+      // ★ GAS 자동 동기화
+      if (typeof gsAutoSync === 'function') gsAutoSync();
+
+      // 저장 후 입력란 초기화 및 버튼 복구
+      clearProdInputs(true);
+      renderProdLedger();
+      updateBadges();
+    }
+
+    // 전체 자료 삭제
+    function clearAllProdData() {
+      if (confirm('⚠️ 경고: 저장된 모든 총생산수량 이력 데이터가 영구적으로 삭제됩니다.\n정말로 전체 삭제하시겠습니까?')) {
+        localStorage.removeItem('prodQty');
+        toast('전체 생산 데이터가 초기화되었습니다.', 'danger');
+        renderProdLedger();
+        clearProdInputs(true);
+        updateStorageInfo();
+      }
+    }
+
+    // 초기화 버튼 클릭 핸들러 (데이터 삭제 여부 확인)
+    function handleProdReset() {
+      if (prodSelYear && prodSelMonth) {
+        if (confirm(`${prodSelYear}년 ${prodSelMonth}월의 기존 저장된 데이터를 모두 삭제하시겠습니까?`)) {
+          const key = prodSelYear + '-' + String(prodSelMonth).padStart(2, '0');
+          let store = {};
+          try { store = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+          if (store[key]) {
+            delete store[key];
+            localStorage.setItem('prodQty', JSON.stringify(store));
+            toast('해당 월의 데이터가 삭제되었습니다.', 'info');
+            renderProdLedger();
+          }
+        }
+      }
+      clearProdInputs(true);
+    }
+
+    // 초기화 (UI만 초기화)
+    function clearProdInputs(resetDate = false) {
+      PROC_LIST.forEach(p => {
+        const qEl = document.getElementById('prod-qty-' + p);
+        const nEl = document.getElementById('prod-note-' + p);
+        if (qEl) qEl.value = '';
+        if (nEl) nEl.value = '';
+      });
+
+      if (resetDate) {
+        prodSelYear = null;
+        prodSelMonth = null;
+        const ymInput = document.getElementById('prod-ym-input');
+        if (ymInput) ymInput.value = '';
+        updateProdInputTitle();
+      }
+
+      // 버튼 텍스트 복구
+      const saveBtn = document.getElementById('prod-save-btn');
+      if (saveBtn) saveBtn.innerHTML = '💾 저장';
+    }
+
+    // 필터 초기화
+    function resetProdFilter() {
+      document.getElementById('prod-filter-year').value = '';
+      document.getElementById('prod-filter-month').value = '';
+      renderProdLedger();
+    }
+
+    // 이력 대장 렌더링
+    function renderProdLedger() {
+      const wrap = document.getElementById('prod-ledger-wrap');
+      if (!wrap) return;
+      let store = {};
+      try { store = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+
+      const fYear = document.getElementById('prod-filter-year').value;
+      const fMonth = document.getElementById('prod-filter-month').value;
+
+      let keys = Object.keys(store).sort().reverse();
+
+      // 필터 년도 목록 채우기
+      const yearsSet = new Set();
+      keys.forEach(k => yearsSet.add(k.split('-')[0]));
+      const years = Array.from(yearsSet).sort().reverse();
+      const yrSelect = document.getElementById('prod-filter-year');
+      const currentYrVal = yrSelect.value;
+      yrSelect.innerHTML = '<option value="">년도 전체</option>' +
+        years.map(y => `<option value="${y}">${y}년</option>`).join('');
+      yrSelect.value = currentYrVal;
+
+      // 필터 적용
+      if (fYear) keys = keys.filter(k => k.startsWith(fYear));
+      if (fMonth) keys = keys.filter(k => parseInt(k.split('-')[1]) === parseInt(fMonth));
+
+      // 제목 업데이트
+      // 생산수량 총 건수 (단순 월 개수가 아닌, 등록된 모든 공정별 항목 합계)
+      const totalEntries = Object.keys(store).reduce((acc, month) => {
+        return acc + Object.keys(store[month]).length;
+      }, 0);
+
+      const titleEl = document.getElementById('prod-ledger-title');
+      if (titleEl) {
+        const countHtml = `<span style="font-size:12px;color:var(--text3);font-weight:400;margin-left:8px;">(총 ${totalEntries.toLocaleString()}건)</span>`;
+        if (fYear || fMonth) {
+          let filterText = '{';
+          if (fYear) filterText += fYear + '년';
+          if (fYear && fMonth) filterText += ' ';
+          if (fMonth) filterText += fMonth + '월';
+          filterText += '} ';
+          titleEl.innerHTML = '📋 ' + filterText + '총생산수량 이력 대장' + countHtml;
+        } else {
+          titleEl.innerHTML = '📋 총생산수량 이력 대장' + countHtml;
+        }
+      }
+
+      if (!keys.length) {
+        wrap.innerHTML = '<div style="text-align:center;color:var(--text3);padding:40px 0;font-size:13px;">조건에 맞는 데이터가 없습니다.</div>';
+        return;
+      }
+
+      const html = keys.map(k => {
+        const [y, m] = k.split('-');
+        const sy = String(parseInt(y)).slice(-2);
+        const ymText = sy + '년 ' + parseInt(m) + '월';
+
+        let monthTotal = 0;
+        const rows = PROC_LIST.map(p => {
+          const data = store[k][p];
+          let qty = '-', note = '';
+          let qVal = 0;
+
+          if (typeof data === 'object' && data !== null) {
+            qVal = data.qty || 0;
+            qty = data.qty != null ? data.qty.toLocaleString('ko-KR') : '-';
+            note = data.note || '';
+          } else {
+            qVal = data || 0;
+            qty = data != null ? data.toLocaleString('ko-KR') : '-';
+          }
+          monthTotal += qVal;
+
+          return `<tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:4px 8px;text-align:center;color:var(--accent2);font-size:11px;width:70px;background:var(--bg2);font-weight:600;">${ymText}</td>
+            <td style="padding:4px 8px;text-align:center;color:var(--text2);font-size:12px;width:70px;">${p}</td>
+            <td style="padding:4px 8px;text-align:right;color:var(--text1);font-size:12px;width:80px;font-weight:600;">${qty}</td>
+            <td style="padding:4px 8px;text-align:left;color:var(--text2);font-size:11px;">${note}</td>
+          </tr>`;
+        }).join('');
+
+        return `<div style="margin-bottom:16px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--card);">
+          <div style="background:var(--bg2);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);">
+            <div style="font-size:12px; font-weight:700; color:var(--accent2);">
+              ${ymText} 수량 합계: <span style="color:var(--accent);">${monthTotal.toLocaleString('ko-KR')}</span>
+            </div>
+            <div style="display:flex;gap:5px;">
+              <button class="btn btn-primary btn-sm" style="padding:2px 10px;font-size:11px;min-height:auto;height:24px;" onclick="editProdMonth('${k}')">수정</button>
+              <button class="btn btn-danger btn-sm" style="padding:2px 10px;font-size:11px;min-height:auto;height:24px;" onclick="deleteProdMonth('${k}')">삭제</button>
+            </div>
+          </div>
+          <table style="width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed;">
+            <thead><tr style="background:var(--bg3);">
+              <th style="padding:5px 8px;color:var(--text3);font-size:11px;width:70px;text-align:center;">년,월</th>
+              <th style="padding:5px 8px;color:var(--text3);font-size:11px;width:70px;text-align:center;">공정</th>
+              <th style="padding:5px 8px;color:var(--text3);font-size:11px;width:80px;text-align:right;">수량</th>
+              <th style="padding:5px 8px;color:var(--text3);font-size:11px;text-align:left;">비고</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+      }).join('');
+      wrap.innerHTML = html;
+      updateBadges(); // 렌더링 시 배지 동기화
+    }
+
+    // 수정 모드: 해당 월 데이터를 입력란으로 로드
+    function editProdMonth(key, targetProc) {
+      const [y, m] = key.split('-');
+      prodSelYear = parseInt(y);
+      prodSelMonth = parseInt(m);
+      prodYear = prodSelYear; // 달력 년도도 동기화
+
+      const sy = String(prodSelYear).slice(-2);
+      const ymInput = document.getElementById('prod-ym-input');
+      if (ymInput) ymInput.value = sy + '년 ' + prodSelMonth + '월';
+
+      // 입력란 타이틀 업데이트
+      updateProdInputTitle();
+
+      // 데이터 로드
+      loadProdData();
+
+      // 저장 버튼을 '수정적용'으로 변경
+      const saveBtn = document.getElementById('prod-save-btn');
+      if (saveBtn) saveBtn.innerHTML = '📝 수정적용';
+
+      // 입력란으로 스크롤
+      const tab = document.getElementById('tab-production');
+      if (tab) tab.scrollTo({ top: 0, behavior: 'smooth' });
+
+      toast(`${y}년 ${m}월 데이터를 편집 모드로 불러왔습니다.`, 'info');
+    }
+
+    // 이력 대장에서 직접 삭제
+    function deleteProdMonth(key) {
+      const [y, m] = key.split('-');
+      if (confirm(`${y}년 ${parseInt(m)}월의 모든 생산 데이터를 삭제하시겠습니까?`)) {
+        let store = {};
+        try { store = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+        delete store[key];
+        localStorage.setItem('prodQty', JSON.stringify(store));
+        toast('데이터가 삭제되었습니다.', 'info');
+        renderProdLedger();
+        // ★ GAS 자동 동기화
+        if (typeof gsAutoSync === 'function') gsAutoSync();
+        // 현재 수정 중인 달이었다면 UI도 초기화
+        if (prodSelYear == y && prodSelMonth == m) {
+          clearProdInputs(true);
+        }
+      }
+    }
+    // 공정 단건 삭제 (현재 미사용이나 호환성 위해 유지 가능하나 구조상 제거)
+    // function deleteProdProc(key, proc) { ... }
+
+
+    // 총생산수량 엑셀 내려받기
+    function exportProdExcel() {
+      let store = {};
+      try { store = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+      const keys = Object.keys(store).sort();
+      if (!keys.length) { toast('저장된 데이터가 없습니다.', 'warn'); return; }
+
+      const headers = ['년월', '공정', '수량', '비고'];
+      const rows = [];
+
+      keys.forEach(k => {
+        const [y, m] = k.split('-');
+        // 엑셀에서 날짜로 인식할 수 있도록 YYYY-MM-DD 형식의 문자열 생성 (해당 월의 1일)
+        const dateObj = new Date(parseInt(y), parseInt(m) - 1, 1);
+        const excelDate = y + '-' + m + '-01';
+
+        PROC_LIST.forEach(p => {
+          const data = store[k][p];
+          let q = '', n = '';
+          if (typeof data === 'object' && data !== null) {
+            q = data.qty != null ? data.qty : '';
+            n = data.note || '';
+          } else {
+            q = data != null ? data : '';
+          }
+          if (q !== '' || n !== '') {
+            rows.push([excelDate, p, q, n]);
+          }
+        });
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      ws['!cols'] = [{ wch: 15 }, { wch: 10 }, { wch: 12 }, { wch: 30 }];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '총생산수량');
+      const d = new Date();
+      XLSX.writeFile(wb, '총생산수량_' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + '.xlsx');
+      toast('엑셀 파일로 내보냈습니다.', 'success');
+    }
+
+    // 총생산수량 엑셀 자료등록
+    function importProdExcel(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          if (rows.length < 2) { toast('데이터가 없습니다.', 'warn'); return; }
+          let store = {};
+          try { store = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (ex) { }
+
+          // 이미 등록된 년-월 키값 세트 생성 (중복 체크용)
+          const existingKeys = new Set(Object.keys(store).filter(k => Object.keys(store[k] || {}).length > 0));
+
+          let imported = 0;
+          let skipped = 0;
+
+          rows.slice(1).forEach(row => {
+            if (!row[0]) return;
+            let fullYear, month;
+            const cell0 = row[0];
+
+            // 1) Javascript Date 객체 (XLSX cellDates: true 옵션 시)
+            if (cell0 instanceof Date) {
+              // 12시간 버퍼를 추가하여 타임존에 의한 날짜 밀림 방지
+              const d = new Date(cell0.getTime() + 12 * 60 * 60 * 1000);
+              fullYear = d.getFullYear();
+              month = d.getMonth() + 1;
+            }
+            // 2) Excel Serial Number (숫자형 날짜)
+            else if (typeof cell0 === 'number' && cell0 > 10000) {
+              // 12시간 버퍼를 추가하여 타임존에 의한 날짜 밀림 방지
+              const d = new Date(Math.round((cell0 - 25569) * 86400 * 1000) + 12 * 60 * 60 * 1000);
+              fullYear = d.getFullYear();
+              month = d.getMonth() + 1;
+            }
+            // 3) 문자열 형식 ("24년 5월", "2024-05-01" 등)
+            else {
+              const ymRaw = String(cell0 || '').trim();
+              const mParts = ymRaw.match(/(\d+)년\s*(\d+)월/);
+              if (mParts) {
+                fullYear = parseInt(mParts[1]) < 100 ? 2000 + parseInt(mParts[1]) : parseInt(mParts[1]);
+                month = parseInt(mParts[2]);
+              } else if (ymRaw.includes('-')) {
+                const parts = ymRaw.split('-');
+                fullYear = parts[0].length === 2 ? 2000 + parseInt(parts[0]) : parseInt(parts[0]);
+                month = parseInt(parts[1]);
+              } else return;
+            }
+
+            const key = fullYear + '-' + String(month).padStart(2, '0');
+
+            // ★ 중복 체크: 이미 DB에 해당 년-월 데이터가 있다면 건너뜀
+            if (existingKeys.has(key)) {
+              skipped++;
+              return;
+            }
+
+            if (!store[key]) store[key] = {};
+
+            // 데이터 형식이 [년월, 공정, 수량, 비고]인 경우 (새 형식)
+            if (row.length >= 3 && !isNaN(row[1])) {
+              const p = parseInt(row[1]);
+              const q = row[2] !== '' ? parseInt(String(row[2]).replace(/,/g, '')) : null;
+              const n = row[3] || '';
+              if (PROC_LIST.includes(p)) {
+                store[key][p] = { qty: q, note: n };
+              }
+            }
+            // 기존 가로 나열 형식 대응 (하위 호환)
+            else {
+              PROC_LIST.forEach((p, idx) => {
+                const v = row[idx + 1];
+                const num = (v != null && v !== '') ? parseInt(String(v).replace(/,/g, '')) : null;
+                if (num !== null) store[key][p] = { qty: num, note: '' };
+              });
+            }
+            imported++;
+          });
+          localStorage.setItem('prodQty', JSON.stringify(store));
+          renderProdLedger();
+
+          let msg = imported + '건 자료등록 완료! ✅';
+          if (skipped > 0) msg += ` (중복 ${skipped}건 제외)`;
+          toast(msg, skipped > 0 ? 'info' : 'success');
+        } catch (err) {
+          toast('엑셀 읽기 실패: ' + err.message, 'error');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+      input.value = '';
+    }
+
     // Calendar state
     let ymYear = new Date().getFullYear();
     let ymSelYear = null; let ymSelMonth = null;
@@ -4242,6 +5116,8 @@
       renderListTable();
       renderKpi();
       updateBadges();
+      buildProdInputRows();
+      renderProdLedger();
 
       // close combos on outside click
       document.addEventListener('click', e => {
@@ -4257,10 +5133,11 @@
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(id).classList.add('active');
-      const map = { 'tab-entry': 'tbtn-entry', 'tab-list': 'tbtn-list', 'tab-kpi': 'tbtn-kpi' };
+      const map = { 'tab-entry': 'tbtn-entry', 'tab-production': 'tbtn-production', 'tab-list': 'tbtn-list', 'tab-kpi': 'tbtn-kpi' };
       if (map[id]) document.getElementById(map[id]).classList.add('active');
       if (id === 'tab-list') { applyFilter(); }
       if (id === 'tab-kpi') { renderKpi(); renderDashboard(); }
+      if (id === 'tab-production') { buildProdInputRows(); loadProdData(); renderProdLedger(); }
     }
 
     function togglePanel(id) {
@@ -5044,25 +5921,30 @@
       renderDashboard();
     }
 
-    function kpiReset() {
-      document.getElementById('kpi-year').value = '';
-      document.getElementById('kpi-month').value = '';
-      // 버튼 강제 초기화
-      ppmSelectedMonth = '';
-      // 도넛 셀렉트 user-set 초기화 → kpi-year/kpi-month 연동 상태로 복귀(전체)
-      const dy = document.getElementById('dash-donut-year');
-      const dm = document.getElementById('dash-donut-month');
-      if (dy) { dy.removeAttribute('data-user-set'); dy.value = ''; }
-      if (dm) { dm.removeAttribute('data-user-set'); dm.value = ''; }
+    /* 1. kpiReset() 기존 코드를 아래 코드로 완전히 교체 */
+function kpiReset() {
+  document.getElementById('kpi-year').value = '';
+  document.getElementById('kpi-month').value = '';
+  ppmSelectedMonth = '';
+  
+  const dy = document.getElementById('dash-donut-year');
+  const dm = document.getElementById('dash-donut-month');
+  if (dy) { dy.removeAttribute('data-user-set'); dy.value = ''; }
+  if (dm) { dm.removeAttribute('data-user-set'); dm.value = ''; }
 
-      // 기타 년도 필터들 초기화
-      const ty = document.getElementById('dash-type-year');
-      if (ty) ty.value = '';
-      const hy = document.getElementById('dash-heatmap-year');
-      if (hy) hy.value = '';
+  // ★ 추가된 부분: 부적합 유형 TOP 필터 (수동 선택 해제)
+  const ty = document.getElementById('dash-type-year');
+  const tm = document.getElementById('dash-type-month');
+  if (ty) { ty.removeAttribute('data-user-set'); ty.value = ''; }
+  if (tm) { tm.removeAttribute('data-user-set'); tm.value = ''; }
 
-      renderKpi();
-    }
+  const hy = document.getElementById('dash-heatmap-year');
+  if (hy) { hy.removeAttribute('data-user-set'); hy.value = ''; }
+
+  renderKpi();
+  renderGauge();
+  renderRadarChart();
+}
 
     /**
      * [추가] 집계 기간을 '당월'로 자동 설정 및 모든 차트 동기화
@@ -5090,15 +5972,21 @@
       selectPpmMonth(monthStr);
 
       // 3. 부적합 유형 TOP 년도 동기화
-      const typeYearEl = document.getElementById('dash-type-year');
-      if (typeYearEl) {
-        if (![...typeYearEl.options].some(o => o.value === yy)) {
-          const opt = document.createElement('option');
-          opt.value = yy; opt.textContent = yearStr;
-          typeYearEl.appendChild(opt);
-        }
-        typeYearEl.value = yy;
-      }
+const typeYearEl = document.getElementById('dash-type-year');
+const typeMonthEl = document.getElementById('dash-type-month');
+if (typeYearEl) {
+  typeYearEl.removeAttribute('data-user-set'); // 연동 상태 복구
+  if (![...typeYearEl.options].some(o => o.value === yy)) {
+    const opt = document.createElement('option');
+    opt.value = yy; opt.textContent = yearStr;
+    typeYearEl.appendChild(opt);
+  }
+  typeYearEl.value = yy;
+}
+if (typeMonthEl) {
+  typeMonthEl.removeAttribute('data-user-set'); // 연동 상태 복구
+  typeMonthEl.value = monthStr;
+}
 
       // 4. 히트맵 년도 동기화
       const heatmapYearEl = document.getElementById('dash-heatmap-year');
@@ -5130,6 +6018,8 @@
 
       // 전체 UI 및 차트 갱신
       renderKpi();
+      renderGauge();
+      renderRadarChart();
       toast('📅 집계 기간이 당월(' + yearStr + ' ' + monthStr + ')로 설정되었습니다.', 'success');
     }
 
@@ -5252,10 +6142,31 @@
     }
 
     function updateBadges() {
-      const cnt = records.length;
-      document.getElementById('badge-list').textContent = cnt;
-      document.getElementById('hdr-count').style.display = cnt ? '' : 'none';
-      document.getElementById('hdr-total-cnt').textContent = cnt.toLocaleString();
+      // 1. 부적합품 이력 대장 (Defect Records)
+      const cnt = (records || []).length;
+      const listBadge = document.getElementById('badge-list');
+      if (listBadge) {
+        listBadge.textContent = cnt.toLocaleString();
+      }
+
+      const hdrCount = document.getElementById('hdr-count');
+      if (hdrCount) hdrCount.style.display = cnt ? '' : 'none';
+
+      const hdrTotal = document.getElementById('hdr-total-cnt');
+      if (hdrTotal) hdrTotal.textContent = cnt.toLocaleString();
+
+      // 2. 공정별 총생산수량 (Production Quantity)
+      try {
+        const prodStore = JSON.parse(localStorage.getItem('prodQty') || '{}');
+        let totalProdEntries = 0;
+        Object.keys(prodStore).forEach(month => {
+          totalProdEntries += Object.keys(prodStore[month]).length;
+        });
+        const prodBadge = document.getElementById('badge-production');
+        if (prodBadge) {
+          prodBadge.textContent = totalProdEntries.toLocaleString();
+        }
+      } catch (e) { console.warn('Badge update error:', e); }
     }
 
     // ════════════════════════════════════════════════
@@ -5739,10 +6650,107 @@
       titleStr += '부적합 현황';
       document.getElementById('print-title-text').textContent = titleStr;
       document.getElementById('print-title-area').style.display = '';
+
+      // ── Chart.js 인쇄 색상 보정 (흰 배경에서 가독성) ──
+      // 인쇄용 색으로 전환
+      applyPrintChartColors();
+      applyPrintHeatmapColors();
+      applyPrintGaugeColors();
       window.print();
+      // 인쇄 후 원래 색으로 복원
       setTimeout(() => {
+        restoreScreenChartColors();
+        restoreScreenHeatmapColors();
+        restoreScreenGaugeColors();
         document.getElementById('print-title-area').style.display = 'none';
-      }, 1000);
+      }, 1500);
+    }
+
+    // 인쇄 시 Chart.js 색상 → 검정 계열로
+    function applyPrintChartColors() {
+      const DARK = '#0f172a';
+      const DARK2 = '#1e293b';
+      // [부적합 유형별 TOP] dash-type-chart
+      const typeChart = dashCharts['deftype'];
+      if (typeChart) {
+        typeChart.options.scales.y.ticks.color = DARK;
+        typeChart.options.scales.x.ticks.color = DARK2;
+        typeChart.options.scales.x.grid.color = 'rgba(0,0,0,0.1)';
+        typeChart.data.datasets[0].datalabels.color = DARK;
+        typeChart.update('none');
+      }
+      // [파레토] dash-pareto-chart
+      const pChart = dashCharts['pareto'];
+      if (pChart) {
+        pChart.options.scales.x.ticks.color = DARK;
+        pChart.options.scales.yLeft.ticks.color = DARK2;
+        pChart.options.scales.yLeft.grid.color = 'rgba(0,0,0,0.1)';
+        pChart.options.plugins.legend.labels.color = DARK;
+        if (pChart.data.datasets[0]) pChart.data.datasets[0].datalabels.color = DARK;
+        pChart.update('none');
+      }
+    }
+
+    // PPM 게이지 SVG 텍스트 인쇄용 보정
+    function applyPrintGaugeColors() {
+      const periodText = document.getElementById('gauge-period-text');
+      if (periodText) { periodText.dataset._origFill = periodText.getAttribute('fill') || '#64748b'; periodText.setAttribute('fill', '#1e293b'); }
+      const pctText = document.getElementById('gauge-pct-text');
+      if (pctText) { pctText.dataset._origFill = pctText.getAttribute('fill') || '#e2e8f0'; }
+      // 배경 반원 밝게
+      const bgPath = document.querySelector('#dash-gauge-svg path:first-child');
+      if (bgPath) { bgPath.dataset._origStroke = bgPath.getAttribute('stroke'); bgPath.setAttribute('stroke', '#cbd5e1'); }
+    }
+    function restoreScreenGaugeColors() {
+      const periodText = document.getElementById('gauge-period-text');
+      if (periodText && periodText.dataset._origFill) periodText.setAttribute('fill', periodText.dataset._origFill);
+      const bgPath = document.querySelector('#dash-gauge-svg path:first-child');
+      if (bgPath && bgPath.dataset._origStroke) bgPath.setAttribute('stroke', bgPath.dataset._origStroke);
+    }
+
+    // 히트맵 셀 텍스트 색상 인쇄용/화면용 전환
+    function applyPrintHeatmapColors() {
+      document.querySelectorAll('.heatmap-cell').forEach(function(el) {
+        el.dataset._origColor = el.style.color || '';
+        el.style.color = '#0f172a';
+        el.style.fontWeight = '700';
+        el.style.textShadow = 'none';
+      });
+      document.querySelectorAll('.heatmap-label').forEach(function(el) {
+        el.dataset._origColor = el.style.color || '';
+        el.style.color = '#0f172a';
+      });
+    }
+    function restoreScreenHeatmapColors() {
+      document.querySelectorAll('.heatmap-cell').forEach(function(el) {
+        el.style.color = el.dataset._origColor || 'rgba(255,255,255,.7)';
+        el.style.fontWeight = '';
+        el.style.textShadow = '';
+      });
+      document.querySelectorAll('.heatmap-label').forEach(function(el) {
+        el.style.color = el.dataset._origColor || '';
+      });
+    }
+
+    // 화면 복원
+    function restoreScreenChartColors() {
+      const typeChart = dashCharts['deftype'];
+      if (typeChart) {
+        typeChart.options.scales.y.ticks.color = '#e2e8f0';
+        typeChart.options.scales.x.ticks.color = '#64748b';
+        typeChart.options.scales.x.grid.color = 'rgba(30,58,95,0.4)';
+        typeChart.data.datasets[0].datalabels.color = '#e2e8f0';
+        typeChart.update('none');
+      }
+      const pChart = dashCharts['pareto'];
+      if (pChart) {
+        pChart.options.scales.x.ticks.color = '#64748b';
+        pChart.options.scales.yLeft.ticks.color = '#64748b';
+        pChart.options.scales.yLeft.grid.color = 'rgba(30,58,95,0.5)';
+        pChart.options.plugins.legend.labels.color = '#94a3b8';
+        if (pChart.data.datasets[0]) pChart.data.datasets[0].datalabels.color = '#ffffff';
+        pChart.update('none');
+      }
     }
 
     function exportData() {
@@ -5811,19 +6819,54 @@
       if (dashCharts[id]) { dashCharts[id].destroy(); delete dashCharts[id]; }
     }
 
-    // ── PPM 데이터: 엑셀 참고3.월별실적 기반 (하드코딩 → 앱 데이터와 연동)
-    const PPM_DATA = {
-      labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
-      target: 220,
-      y25: {
-        ppm: [718.0, 449.8, 98.0, 256.0, 242.7, 313.3, 228.0, 264.2, 307.0, 0, 180.0, 494.7],
-        avg: [718.0, 583.9, 421.9, 380.4, 352.9, 346.3, 329.4, 321.2, 319.7, 287.7, 277.9, 296.0]
-      },
-      y26: {
-        ppm: [820.2, 784.7, 258.0, null, null, null, null, null, null, null, null, null],
-        avg: [820.2, 802.4, 621.0, null, null, null, null, null, null, null, null, null]
+    // ── PPM 데이터: 탭간 연동 실시간 계산 엔진 ────────────────────
+    function calcYearlyPpm(yearStr) {
+      const ppm = new Array(12).fill(null);
+      const avg = new Array(12).fill(null);
+      const defectArr = new Array(12).fill(0);
+      const prodArr = new Array(12).fill(0);
+
+      // 1. 가공불량 수량 합산 (이력대장 records 연동)
+      records.filter(r => r.year === yearStr).forEach(r => {
+        if (r.month) {
+          const idx = parseInt(r.month) - 1;
+          if (idx >= 0 && idx < 12) defectArr[idx] += (r.machQty || 0);
+        }
+      });
+
+      // 2. 총생산수량 합산 (prodQty localStorage 연동)
+      let prodStore = {};
+      try { prodStore = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+      let yNum = parseInt(yearStr);
+      if (yNum < 100) yNum += 2000;
+
+      for (let m = 1; m <= 12; m++) {
+        const key = yNum + '-' + String(m).padStart(2, '0');
+        const mData = prodStore[key];
+        if (mData) {
+          let mTotal = 0;
+          Object.values(mData).forEach(p => {
+            if (typeof p === 'object' && p !== null) mTotal += (p.qty || 0);
+            else mTotal += (p || 0);
+          });
+          prodArr[m - 1] = mTotal;
+        }
       }
-    };
+
+      // 3. PPM 공식 적용: (가공불량 / 생산수량) * 1,000,000
+      let ppmSum = 0;
+      let activeMonths = 0;
+      for (let i = 0; i < 12; i++) {
+        if (prodArr[i] > 0) {
+          const mPpm = (defectArr[i] / prodArr[i]) * 1000000;
+          ppm[i] = parseFloat(mPpm.toFixed(1));
+          ppmSum += mPpm;
+          activeMonths++;
+          avg[i] = parseFloat((ppmSum / activeMonths).toFixed(1));
+        }
+      }
+      return { ppm, avg };
+    }
 
     function renderDashboard() {
       renderDashKpi();
@@ -5869,33 +6912,34 @@
       const totalAll = totalMach + totalMat;
       const cnt = allRec.length;
 
-      // PPM: 올해/작년 데이터만 연동
-      const thisYear = String(new Date().getFullYear()).slice(-2) + '년';
-      const lastYear = String(new Date().getFullYear() - 1).slice(-2) + '년';
-
-      function calcYearlyPpm(yearStr) {
-        const byMonth = {};
-        records.filter(function (r) { return r.year === yearStr; }).forEach(function (r) {
-          const m = r.month;
-          if (!m) return;
-          if (!byMonth[m]) byMonth[m] = 0;
-          byMonth[m] += r.machQty || 0; // 가공불량만
-        });
-        // 누계 PPM: 기준생산량은 고정값(PPM_DATA)에서 가져오되, 분자는 앱 데이터
-        return byMonth;
+      // PPM: 필터링된 년도 및 전년도 데이터 연동
+      let baseYear;
+      if (kpiYear) {
+        let ky = parseInt(kpiYear.replace('년', ''));
+        baseYear = ky < 100 ? 2000 + ky : ky;
+      } else {
+        const years = records.map(r => parseInt(r.year)).filter(Boolean);
+        let prodStore = {};
+        try { prodStore = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+        Object.keys(prodStore).forEach(k => years.push(parseInt(k.split('-')[0])));
+        baseYear = (years.length > 0) ? Math.max(...years) : new Date().getFullYear();
       }
 
-      // 누계 PPM 계산 (올해 앱 데이터 기준, PPM_DATA avg 마지막 유효값)
-      const latestPpm26 = PPM_DATA.y26.avg.filter(function (v) { return v !== null; });
-      const latestPpm25 = PPM_DATA.y25.avg.filter(function (v) { return v !== null; });
-      const curPpm = latestPpm26.length ? latestPpm26[latestPpm26.length - 1].toFixed(1) : '-';
-      const prevPpm = latestPpm25.length ? latestPpm25[latestPpm25.length - 1].toFixed(1) : '-';
+      const thisYearStr = String(baseYear).slice(-2) + '년';
+      const lastYearStr = String(baseYear - 1).slice(-2) + '년';
+
+      const ppmDataThis = calcYearlyPpm(thisYearStr);
+      const ppmDataLast = calcYearlyPpm(lastYearStr);
+      const latestPpmThis = ppmDataThis.avg.filter(v => v !== null);
+      const latestPpmLast = ppmDataLast.avg.filter(v => v !== null);
+      const curPpm = latestPpmThis.length ? latestPpmThis[latestPpmThis.length - 1].toFixed(1) : '-';
+      const prevPpm = latestPpmLast.length ? latestPpmLast[latestPpmLast.length - 1].toFixed(1) : '-';
 
       const kpis = [
         { cls: 'c1', icon: '💥', label: '총 불량수량(가공+소재)', val: totalAll.toLocaleString(), unit: '개', sub: (kpiYear || '전체') + ' ' + (kpiMonth || '전체') },
         { cls: 'c2', icon: '⚙️', label: '가공불량 합계', val: totalMach.toLocaleString(), unit: '개', sub: '소재불량 제외' },
-        { cls: 'c3', icon: '📉', label: '올해 누적 PPM', val: curPpm, unit: 'PPM', sub: '목표 220 PPM' },
-        { cls: 'c4', icon: '📊', label: '전년 누적 PPM', val: prevPpm, unit: 'PPM', sub: '전년도 동기 대비' },
+        { cls: 'c3', icon: '📉', label: thisYearStr + ' 누적 PPM', val: curPpm, unit: 'PPM', sub: '목표 220 PPM' },
+        { cls: 'c4', icon: '📊', label: lastYearStr + ' 누적 PPM', val: prevPpm, unit: 'PPM', sub: '전년도 동기 대비' },
         { cls: 'c5', icon: '🔩', label: '부시+볼트 불량', val: (totalBush + totalBolt).toLocaleString(), unit: '개', sub: '부시+볼트' },
       ];
 
@@ -5936,19 +6980,21 @@
       const ctx = document.getElementById('dash-ppm-chart');
       if (!ctx) return;
 
-      const labels = PPM_DATA.labels;
-      const target = PPM_DATA.target;
-      const curYear = new Date().getFullYear();
+      const labels = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+      const target = 220;
 
-      // ── 년도 필터 연동: kpi-year 값이 있으면 그 년도 기준, 없으면 현재년도 기준 ──
+      // ── 년도 필터 연동: kpi-year 값이 있으면 그 년도 기준, 없으면 데이터가 있는 마지막 년도 기준 ──
       const kpiYear = document.getElementById('kpi-year')?.value || '';
       var baseYear;
       if (kpiYear) {
-        // kpi-year 값 형식: '26년' 또는 '2026년' 등 → 숫자 추출
         var ky = parseInt(kpiYear.replace('년', ''));
         baseYear = ky < 100 ? 2000 + ky : ky;
       } else {
-        baseYear = curYear;
+        const years = records.map(r => parseInt(r.year)).filter(Boolean);
+        let prodStore = {};
+        try { prodStore = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+        Object.keys(prodStore).forEach(k => years.push(parseInt(k.split('-')[0])));
+        baseYear = (years.length > 0) ? Math.max(...years) : new Date().getFullYear();
       }
       const thisYearStr = String(baseYear).slice(-2) + '년';
       const lastYearStr = String(baseYear - 1).slice(-2) + '년';
@@ -5960,7 +7006,7 @@
       // 버튼 동기화 (kpi-month 필터로 인해 렌더될 때도 버튼 상태 유지)
       document.querySelectorAll('.ppm-mbtn').forEach(function (btn) {
         var bm = btn.getAttribute('data-m');
-        if (bm === ppmSelectedMonth) {
+        if (bm === activeMonth) {
           btn.style.background = 'var(--accent)';
           btn.style.color = '#fff';
           btn.style.borderColor = 'var(--accent)';
@@ -5971,58 +7017,15 @@
         }
       });
 
-      // 앱 데이터에서 올해/작년 월별 가공불량 수량 집계 → PPM 환산
-      function getMonthlyPpmCalc(yearStr, ppmRef) {
-        // 월별 가공불량 수량 집계
-        const qtyArr = new Array(12).fill(0);
-        const hasData = new Array(12).fill(false);
-        records.filter(function (r) { return r.year === yearStr; }).forEach(function (r) {
-          const m = r.month;
-          if (!m) return;
-          const idx = parseInt(m) - 1;
-          if (idx >= 0 && idx < 12) {
-            qtyArr[idx] = (qtyArr[idx] || 0) + (r.machQty || 0);
-            hasData[idx] = true;
-          }
-        });
-        return ppmRef.map(function (v, i) {
-          if (hasData[i]) return v !== null ? v : null;
-          return v !== null ? v : null;
-        });
-      }
+      const ppmDataThis = calcYearlyPpm(thisYearStr);
+      const ppmDataLast = calcYearlyPpm(lastYearStr);
+      const bar26 = ppmDataThis.ppm;
+      const bar25 = ppmDataLast.ppm;
 
-      // 막대: PPM 값 (PPM_DATA.ppm 기준)
-      // 년도 필터가 있으면 해당 년도 ppm 데이터 사용, 없으면 기본 y26/y25 사용
-      var ppmDataThis = PPM_DATA.y26;
-      var ppmDataLast = PPM_DATA.y25;
-      // baseYear가 현재연도와 다를 경우에도 y26/y25를 그대로 활용
-      // (PPM_DATA 구조 유지, 년도 레이블만 변경)
-      const bar25 = getMonthlyPpmCalc(lastYearStr, ppmDataLast.ppm);
-      const bar26 = getMonthlyPpmCalc(thisYearStr, ppmDataThis.ppm);
-
-      // ─── 전체보기(activeMonth 없음) 시 올해 마지막 데이터 월 찾기 ───
-      var lastDataMonthIdx = -1; // 올해 기준 마지막 데이터가 있는 월 인덱스
-      if (!activeMonth) {
-        for (var i = 11; i >= 0; i--) {
-          if (bar26[i] !== null && bar26[i] !== undefined) {
-            lastDataMonthIdx = i;
-            break;
-          }
-        }
-        // bar26에 데이터 없으면 records에서 직접 찾기
-        if (lastDataMonthIdx === -1) {
-          var thisYearRecords = records.filter(function (r) { return r.year === thisYearStr; });
-          if (thisYearRecords.length > 0) {
-            var maxMonthIdx = -1;
-            thisYearRecords.forEach(function (r) {
-              if (r.month) {
-                var idx = parseInt(r.month) - 1;
-                if (idx > maxMonthIdx) maxMonthIdx = idx;
-              }
-            });
-            lastDataMonthIdx = maxMonthIdx;
-          }
-        }
+      // ─── 전체보기 시 마지막 데이터 월 찾기 ───
+      var lastDataMonthIdx = -1;
+      for (var i = 11; i >= 0; i--) {
+        if (bar26[i] !== null) { lastDataMonthIdx = i; break; }
       }
 
       // ─── 색상 로직 ───
@@ -6083,13 +7086,14 @@
               barPercentage: 0.75,
               categoryPercentage: 0.65,
               datalabels: {
-                display: true, anchor: 'end', align: 'bottom',
+                display: true, anchor: 'start', align: 'top', offset: 4,
                 color: function (ctx2) {
                   var idx2 = ctx2.dataIndex;
-                  if (activeMonth) {
-                    return labels[idx2] === activeMonth ? '#4b5563' : '#94a3b8';
-                  }
-                  return (lastDataMonthIdx >= 0 && idx2 === lastDataMonthIdx) ? '#4b5563' : '#94a3b8';
+                  // 짙은 회색 바(#4b5563 등)에서 가독성을 위해 흰색 또는 밝은색 반환
+                  var isHighlight = activeMonth ? (labels[idx2] === activeMonth)
+                    : (lastDataMonthIdx >= 0 && idx2 === lastDataMonthIdx);
+                  if (isHighlight) return '#ffffff'; // 강조된 짙은 회색 바에서는 흰색
+                  return '#94a3b8';
                 },
                 font: function (ctx2) {
                   var idx2 = ctx2.dataIndex;
@@ -6109,13 +7113,13 @@
               barPercentage: 0.75,
               categoryPercentage: 0.65,
               datalabels: {
-                display: true, anchor: 'end', align: 'bottom',
+                display: true, anchor: 'start', align: 'top', offset: 4,
                 color: function (ctx2) {
                   var idx2 = ctx2.dataIndex;
                   if (activeMonth) {
-                    return labels[idx2] === activeMonth ? '#fca5a5' : '#e2e8f0';
+                    return labels[idx2] === activeMonth ? '#ffffff' : '#e2e8f0';
                   }
-                  return (lastDataMonthIdx >= 0 && idx2 === lastDataMonthIdx) ? '#fca5a5' : '#e2e8f0';
+                  return (lastDataMonthIdx >= 0 && idx2 === lastDataMonthIdx) ? '#ffffff' : '#e2e8f0';
                 },
                 font: { size: 9, weight: 'bold' },
                 formatter: function (v) { return v != null ? Math.round(v) : ''; }
@@ -6264,8 +7268,8 @@
               borderWidth: 0,
               yAxisID: 'yLeft',
               datalabels: {
-                display: true, anchor: 'end', align: 'top',
-                color: '#e2e8f0', font: { size: 10, weight: 'bold' },
+                display: true, anchor: 'start', align: 'top', offset: 4,
+                color: '#ffffff', font: { size: 10, weight: 'bold' },
                 formatter: function (v) { return v || ''; }
               }
             },
@@ -6346,83 +7350,117 @@
     }
 
     // ── 부적합 유형 TOP 가로막대 ─────────────────────
-    function renderTypeChart() {
-      destroyDashChart('deftype');
-      const ctx = document.getElementById('dash-type-chart');
-      if (!ctx) return;
+    // ── 부적합 유형 TOP 가로막대 ─────────────────────
+function renderTypeChart() {
+  destroyDashChart('deftype');
+  const ctx = document.getElementById('dash-type-chart');
+  if (!ctx) return;
 
-      const kpiYear = document.getElementById('kpi-year')?.value || '';
-      const kpiMonth = document.getElementById('kpi-month')?.value || '';
-      const filterYear = document.getElementById('dash-type-year')?.value || '';
-      const topN = parseInt(document.getElementById('dash-top-n')?.value || '5');
+  // 1. 상단 글로벌 필터 값 가져오기
+  const kpiYear = document.getElementById('kpi-year')?.value || '';
+  const kpiMonth = document.getElementById('kpi-month')?.value || '';
 
-      let src = records;
-      if (kpiYear) src = src.filter(function (r) { return r.year === kpiYear; });
-      if (kpiMonth) src = src.filter(function (r) { return r.month === kpiMonth; });
-      if (filterYear) src = src.filter(function (r) { return r.year === filterYear + '년'; });
+  // 2. 차트 자체 필터 셀렉트박스
+  const typeYearSel = document.getElementById('dash-type-year');
+  const typeMonthSel = document.getElementById('dash-type-month');
 
-      // 부적합 내용별 가공불량만 집계
-      const map = {};
-      src.forEach(function (r) {
-        const k = (r.defectCode || '?') + ' ' + (r.defectContent || '');
-        if (!map[k]) map[k] = 0;
-        map[k] += (r.machQty || 0); // ★ 가공불량만
-      });
-
-      let sorted = Object.entries(map).filter(function (e) { return e[1] > 0; })
-        .sort(function (a, b) { return b[1] - a[1]; });
-      if (topN > 0) sorted = sorted.slice(0, topN);
-
-      const labels = sorted.map(function (e) { return e[0]; });
-      const vals = sorted.map(function (e) { return e[1]; });
-      const maxVal = vals[0] || 1;
-
-      const COLORS = ['rgba(239,68,68,0.85)', 'rgba(245,158,11,0.85)', 'rgba(14,165,233,0.85)',
-        'rgba(16,185,129,0.85)', 'rgba(139,92,246,0.85)', 'rgba(236,72,153,0.85)',
-        'rgba(251,146,60,0.85)', 'rgba(52,211,153,0.85)', 'rgba(96,165,250,0.85)',
-        'rgba(232,121,249,0.85)'];
-
-      dashCharts['deftype'] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: '가공불량수량',
-            data: vals,
-            backgroundColor: vals.map(function (_, i) { return COLORS[i % COLORS.length]; }),
-            borderWidth: 0,
-            borderRadius: 4,
-            datalabels: {
-              display: true, anchor: 'end', align: 'right',
-              color: '#e2e8f0', font: { size: 11, weight: 'bold' },
-              formatter: function (v) { return v + '개'; }
-            }
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              beginAtZero: true,
-              max: Math.ceil(maxVal * 1.25),
-              ticks: { color: '#64748b', font: { size: 10 } },
-              grid: { color: 'rgba(30,58,95,0.4)' }
-            },
-            y: {
-              ticks: { color: '#e2e8f0', font: { size: 11 } },
-              grid: { display: false }
-            }
-          },
-          plugins: {
-            legend: { display: false },
-            datalabels: {}
-          }
-        },
-        plugins: [ChartDataLabels]
-      });
+  // 년도 옵션 동기화
+  if (typeYearSel && records.length > 0) {
+    const years = [...new Set(records.map(r => r.year).filter(Boolean))].sort();
+    
+    // 사용자가 개별 선택하지 않은(연동 상태) 경우에만 글로벌 필터 기준
+    if (!typeYearSel.getAttribute('data-user-set') && kpiYear) {
+      typeYearSel.value = kpiYear.replace('년', '');
     }
+
+    const curVal = typeYearSel.value;
+    typeYearSel.innerHTML = '<option value="">전체</option>' +
+      years.map(y => {
+        const yv = y.replace('년', '');
+        return `<option value="${yv}" ${curVal === yv ? 'selected' : ''}>${y}</option>`;
+      }).join('');
+  }
+
+  // 월 옵션 동기화
+  if (typeMonthSel) {
+    if (!typeMonthSel.getAttribute('data-user-set') && kpiMonth) {
+      typeMonthSel.value = kpiMonth;
+    }
+  }
+
+  // 최종 필터링 데이터
+  const selYear = typeYearSel ? typeYearSel.value : '';
+  const selMonth = typeMonthSel ? typeMonthSel.value : '';
+  const topN = parseInt(document.getElementById('dash-top-n')?.value || '10');
+
+  // 3. 기록에서 년, 월도로 데이터 필터링 수행
+  let src = records;
+  if (selYear) src = src.filter(r => r.year === selYear + '년');
+  if (selMonth) src = src.filter(r => r.month === selMonth);
+
+  // 부적합 내용별 가공불량만 집계
+  const map = {};
+  src.forEach(function (r) {
+    const k = (r.defectCode || '?') + ' ' + (r.defectContent || '');
+    if (!map[k]) map[k] = 0;
+    map[k] += (r.machQty || 0);
+  });
+
+  let sorted = Object.entries(map).filter(function (e) { return e[1] > 0; })
+    .sort(function (a, b) { return b[1] - a[1]; });
+
+  if (topN > 0) sorted = sorted.slice(0, topN);
+
+  const labels = sorted.map(function (e) { return e[0]; });
+  const vals = sorted.map(function (e) { return e[1]; });
+  const maxVal = vals.length > 0 ? Math.max(...vals) : 1;
+
+  const COLORS = ['rgba(239,68,68,0.85)', 'rgba(245,158,11,0.85)', 'rgba(14,165,233,0.85)',
+    'rgba(16,185,129,0.85)', 'rgba(139,92,246,0.85)', 'rgba(236,72,153,0.85)',
+    'rgba(251,146,60,0.85)', 'rgba(52,211,153,0.85)', 'rgba(96,165,250,0.85)',
+    'rgba(232,121,249,0.85)'];
+
+  dashCharts['deftype'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '가공불량수량',
+        data: vals,
+        backgroundColor: vals.map(function (_, i) { return COLORS[i % COLORS.length]; }),
+        borderWidth: 0,
+        borderRadius: 4,
+        datalabels: {
+          display: true, anchor: 'end', align: 'right',
+          color: '#e2e8f0', font: { size: 11, weight: 'bold' },
+          formatter: function (v) { return v + '개'; }
+        }
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: Math.ceil(maxVal * 1.25),
+          ticks: { color: '#64748b', font: { size: 10 } },
+          grid: { color: 'rgba(30,58,95,0.4)' }
+        },
+        y: {
+          ticks: { color: '#e2e8f0', font: { size: 11 } },
+          grid: { display: false }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {}
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
 
     // ═══════════════════════════════════════════════
     //  ★ 추가 대시보드 위젯
@@ -6442,27 +7480,24 @@
       const donutMonthSel = document.getElementById('dash-donut-month');
 
       // 연도 옵션 목록 동기화
-      if (donutYearSel) {
+      if (donutYearSel && records.length > 0) {
         const years = [...new Set(records.map(function (r) { return r.year; }).filter(Boolean))].sort();
-        // 현재 도넛 셀렉트 값: 사용자가 직접 바꿨으면 유지, 아니면 kpi-year 값을 기본으로 세팅
-        const curDonutYear = donutYearSel.getAttribute('data-user-set') === '1'
-          ? donutYearSel.value
-          : (kpiYear ? kpiYear.replace('년', '') : '');
-
+        // data-user-set 없으면 kpiYear로 자동 동기화, 있으면 수동 선택 유지
+        const isYearUserSet = donutYearSel.getAttribute('data-user-set') === '1';
+        const curDonutYear = isYearUserSet ? donutYearSel.value : (kpiYear ? kpiYear.replace('년', '') : donutYearSel.value);
         donutYearSel.innerHTML = '<option value="">전체</option>' +
           years.map(function (y) {
             const yv = y.replace('년', '');
             return '<option value="' + yv + '"' + (curDonutYear === yv ? ' selected' : '') + '>' + y + '</option>';
           }).join('');
-        donutYearSel.value = curDonutYear;
+        if (curDonutYear) donutYearSel.value = curDonutYear;
       }
 
-      // 월 셀렉트: kpi-month 기본 연동 (사용자가 직접 바꾼 경우 유지)
+      // 월 셀렉트: data-user-set 없을 때만 kpi-month 자동 연동
       if (donutMonthSel) {
-        const curDonutMonth = donutMonthSel.getAttribute('data-user-set') === '1'
-          ? donutMonthSel.value
-          : kpiMonth;
-        donutMonthSel.value = curDonutMonth;
+        const isMonthUserSet = donutMonthSel.getAttribute('data-user-set') === '1';
+        if (!isMonthUserSet && kpiMonth) donutMonthSel.value = kpiMonth;
+        else if (!isMonthUserSet && !kpiMonth) donutMonthSel.value = '';
       }
 
       const selYear = donutYearSel ? donutYearSel.value : '';
@@ -6598,7 +7633,11 @@
       const sel = document.getElementById('dash-heatmap-year');
       if (!sel) return;
       const years = [...new Set(records.map(function (r) { return r.year; }).filter(Boolean))].sort();
-      const cur = sel.value;
+      // ★ data-user-set이 있으면 수동 선택 유지, 없으면 kpi-year로 자동 동기화
+      const kpiYear = document.getElementById('kpi-year')?.value || '';
+      const kpiYearShort = kpiYear ? kpiYear.replace('년', '') : '';
+      const isUserSet = sel.getAttribute('data-user-set') === '1';
+      const cur = isUserSet ? sel.value : (kpiYearShort || sel.value);
       sel.innerHTML = '<option value="">전체</option>' +
         years.map(function (y) {
           return '<option value="' + (y.replace('년', '')) + '"' + (cur === (y.replace('년', '')) ? ' selected' : '') + '>' + y + '</option>';
@@ -6608,9 +7647,45 @@
 
     // ── 1. PPM 목표 달성률 게이지 ─────────────────────
     function renderGauge() {
-      const target = PPM_DATA.target; // 220
-      const latestPpm26 = PPM_DATA.y26.avg.filter(function (v) { return v !== null; });
-      const curPpm = latestPpm26.length ? latestPpm26[latestPpm26.length - 1] : null;
+      const target = 220; // PPM 목표
+      // ★ kpi-year/kpi-month 필터 연동
+      const kpiYear  = document.getElementById('kpi-year')?.value  || '';
+      const kpiMonth = document.getElementById('kpi-month')?.value || '';
+      var gBaseYear;
+      if (kpiYear) {
+        var gky = parseInt(kpiYear.replace('년', ''));
+        gBaseYear = gky < 100 ? 2000 + gky : gky;
+      } else {
+        const gyears = records.map(r => parseInt(r.year)).filter(Boolean);
+        let gprodStore = {};
+        try { gprodStore = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+        Object.keys(gprodStore).forEach(k => gyears.push(parseInt(k.split('-')[0])));
+        gBaseYear = (gyears.length > 0) ? Math.max(...gyears) : new Date().getFullYear();
+      }
+      const gThisYearStr = String(gBaseYear).slice(-2) + '년';
+      const gPpmData = calcYearlyPpm(gThisYearStr);
+
+      let curPpm = null;
+      if (kpiMonth) {
+        // 선택된 월의 PPM 표시
+        const mIdx = parseInt(kpiMonth) - 1;
+        curPpm = gPpmData.ppm[mIdx];
+      } else {
+        // 월 미선택 시 최신 누계 PPM 표시
+        const latestPpm26 = gPpmData.avg.filter(function (v) { return v !== null; });
+        curPpm = latestPpm26.length ? latestPpm26[latestPpm26.length - 1] : null;
+      }
+      // gauge 부제목에 기준 기간 표시
+      const gaugeSubLabel = document.getElementById('gauge-period-text');
+      if (gaugeSubLabel) {
+        const periodStr = kpiMonth ? (gThisYearStr + ' ' + kpiMonth) : (gThisYearStr + ' 전체');
+        gaugeSubLabel.textContent = periodStr + ' PPM (목표 ' + target + ')';
+      }
+      // 게이지 카드 헤더 기간 레이블
+      const gaugePeriodHeader = document.getElementById('gauge-period-header');
+      if (gaugePeriodHeader) {
+        gaugePeriodHeader.textContent = kpiMonth ? (gThisYearStr + ' ' + kpiMonth) : (kpiYear ? gThisYearStr + ' 전체' : '전체');
+      }
 
       const progressEl = document.getElementById('gauge-progress');
       const pctText = document.getElementById('gauge-pct-text');
@@ -6651,8 +7726,18 @@
       const ctx = document.getElementById('dash-radar-chart');
       if (!ctx) return;
 
-      const thisYearStr = String(new Date().getFullYear()).slice(-2) + '년';
-      const lastYearStr = String(new Date().getFullYear() - 1).slice(-2) + '년';
+      // ★ kpi-year 필터 연동
+      const kpiYear = document.getElementById('kpi-year')?.value || '';
+      const kpiMonth = document.getElementById('kpi-month')?.value || '';
+      var rBaseYear;
+      if (kpiYear) {
+        var rky = parseInt(kpiYear.replace('년', ''));
+        rBaseYear = rky < 100 ? 2000 + rky : rky;
+      } else {
+        rBaseYear = new Date().getFullYear();
+      }
+      const thisYearStr = String(rBaseYear).slice(-2) + '년';
+      const lastYearStr = String(rBaseYear - 1).slice(-2) + '년';
 
       // 발견공정 목록 수집
       const procSet = new Set();
@@ -6663,7 +7748,11 @@
       function getProcMach(yearStr) {
         const map = {};
         procs.forEach(function (p) { map[p] = 0; });
-        records.filter(function (r) { return r.year === yearStr; }).forEach(function (r) {
+        records.filter(function (r) {
+          if (r.year !== yearStr) return false;
+          if (kpiMonth && r.month !== kpiMonth) return false; // ★ 월 필터 적용
+          return true;
+        }).forEach(function (r) {
           if (r.foundProc && map[r.foundProc] !== undefined) map[r.foundProc] += (r.machQty || 0);
         });
         return procs.map(function (p) { return map[p]; });
@@ -6672,6 +7761,13 @@
       const data25 = getProcMach(lastYearStr);
       const data26 = getProcMach(thisYearStr);
       const labels = procs.map(function (p) { return p + '공정'; });
+
+      // 기간 레이블 업데이트
+      const radarPeriodLabel = document.getElementById('radar-period-label');
+      if (radarPeriodLabel) {
+        const monthSuffix = kpiMonth ? (' ' + kpiMonth) : '';
+        radarPeriodLabel.textContent = lastYearStr + monthSuffix + ' vs ' + thisYearStr + monthSuffix;
+      }
 
       dashCharts['radar'] = new Chart(ctx, {
         type: 'radar',
@@ -6721,7 +7817,7 @@
             datalabels: { display: false }
           }
         },
-        plugins: [ChartDataLabels]
+        plugins: [] // ChartDataLabels 제거: 레이더에서 pointLabels 중복 방지
       });
     }
 
@@ -6732,13 +7828,25 @@
       if (!ctx) return;
 
       const kpiYear = document.getElementById('kpi-year')?.value || '';
-      const thisYearStr = String(new Date().getFullYear()).slice(-2) + '년';
-      const targetYear = kpiYear || thisYearStr;
+      const kpiMonth = document.getElementById('kpi-month')?.value || '';
+      // ★ 기준 년도: kpi-year 선택 우선, 없으면 최신 년도
+      var mbBaseYear;
+      if (kpiYear) {
+        var mbky = parseInt(kpiYear.replace('년', ''));
+        mbBaseYear = mbky < 100 ? 2000 + mbky : mbky;
+      } else {
+        mbBaseYear = new Date().getFullYear();
+      }
+      const thisYearStr = String(mbBaseYear).slice(-2) + '년';
+
+      // 카드 제목 기간 레이블 없음 (삭제됨)
 
       const monthMap = {};
       for (let i = 1; i <= 12; i++) monthMap[i + '월'] = 0;
 
-      records.filter(function (r) { return r.year === targetYear; }).forEach(function (r) {
+      // kpiMonth가 선택된 경우: 해당 월의 일자별 건수가 아닌,
+      // 전체 월 데이터를 보여주되 해당 월을 강조 (연도 필터만 적용)
+      records.filter(function (r) { return r.year === thisYearStr; }).forEach(function (r) {
         if (r.month) monthMap[r.month] = (monthMap[r.month] || 0) + 1;
       });
 
@@ -6746,7 +7854,9 @@
       const vals = Object.values(monthMap);
       const maxVal = Math.max(...vals, 1);
 
-      const barColors = vals.map(function (v) {
+      // ★ kpiMonth 선택 시 해당 월 강조
+      const barColors = vals.map(function (v, i) {
+        if (kpiMonth && labels[i] === kpiMonth) return 'rgba(239,68,68,0.95)'; // 선택 월 강조
         const ratio = v / maxVal;
         if (ratio >= 0.8) return 'rgba(239,68,68,0.8)';
         if (ratio >= 0.5) return 'rgba(245,158,11,0.75)';
@@ -6764,8 +7874,8 @@
             borderWidth: 0,
             borderRadius: 4,
             datalabels: {
-              display: true, anchor: 'end', align: 'top',
-              color: '#94a3b8', font: { size: 9 },
+              display: true, anchor: 'start', align: 'top', offset: 4,
+              color: '#ffffff', font: { size: 9, weight: 'bold' },
               formatter: function (v) { return v > 0 ? v + '건' : ''; }
             }
           }]
@@ -6799,7 +7909,15 @@
       const container = document.getElementById('dash-heatmap-container');
       if (!container) return;
 
-      const selYear = document.getElementById('dash-heatmap-year')?.value || '';
+      // ★ data-user-set 있으면 수동 선택 우선, 없으면 kpi-year 자동 연동
+      const kpiYear = document.getElementById('kpi-year')?.value || '';
+      const kpiMonth = document.getElementById('kpi-month')?.value || '';
+      const hmYearEl = document.getElementById('dash-heatmap-year');
+      const hmSelYear = hmYearEl?.value || '';
+      const isHmUserSet = hmYearEl?.getAttribute('data-user-set') === '1';
+
+      let effYear = isHmUserSet ? hmSelYear : (kpiYear ? kpiYear.replace('년', '') : hmSelYear);
+
       const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
 
       // 발견공정 목록
@@ -6816,7 +7934,7 @@
       });
 
       let src = records;
-      if (selYear) src = src.filter(function (r) { return r.year === selYear + '년'; });
+      if (effYear) src = src.filter(function (r) { return r.year === effYear + '년'; });
       src.forEach(function (r) {
         if (r.foundProc && grid[r.foundProc] && r.month) {
           grid[r.foundProc][r.month] = (grid[r.foundProc][r.month] || 0) + (r.machQty || 0);
@@ -6840,7 +7958,6 @@
 
       const cellW = 46;
       const labelW = 52;
-      const totalCols = months.length + 1;
 
       let html = '<div style="display:inline-block;min-width:' + (labelW + cellW * 12 + 36) + 'px">';
 
@@ -6848,7 +7965,9 @@
       html += '<div style="display:grid;grid-template-columns:' + labelW + 'px repeat(12,' + cellW + 'px);gap:3px;margin-bottom:3px">';
       html += '<div class="heatmap-label"></div>';
       months.forEach(function (m) {
-        html += '<div class="heatmap-label" style="font-size:10px;color:var(--text3);font-family:var(--mono)">' + m + '</div>';
+        // ★ kpiMonth 선택 시 해당 월 헤더 강조
+        const isActive = kpiMonth && m === kpiMonth;
+        html += '<div class="heatmap-label" style="font-size:10px;color:' + (isActive ? 'var(--accent)' : 'var(--text3)') + ';font-family:var(--mono);' + (isActive ? 'font-weight:700;' : '') + '">' + m + '</div>';
       });
       html += '</div>';
 
@@ -6860,7 +7979,9 @@
           const v = grid[p][m];
           const bg = heatColor(v);
           const txt = v > 0 ? v : '';
-          html += '<div class="heatmap-cell" style="background:' + bg + ';height:26px;border-radius:4px" title="' + p + '공정 ' + m + ': ' + v + '개">' + txt + '</div>';
+          // ★ kpiMonth 선택 시 해당 열 테두리 강조
+          const isActive = kpiMonth && m === kpiMonth;
+          html += '<div class="heatmap-cell" style="background:' + bg + ';height:26px;border-radius:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;' + (isActive ? 'outline:2px solid var(--accent);outline-offset:-1px;' : '') + '" title="' + p + '공정 ' + m + ': ' + v + '개">' + txt + '</div>';
         });
         html += '</div>';
       });
@@ -6873,7 +7994,7 @@
       if (legendBar) {
         const steps = [0, 0.15, 0.35, 0.55, 0.75, 1.0];
         legendBar.innerHTML = steps.map(function (s) {
-          return '<div class="heatmap-legend-cell" style="background:' + heatColor(s * maxVal) + '"></div>';
+          return '<div class="heatmap-legend-cell" style="background:' + heatColor(s * maxVal) + ';-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact"></div>';
         }).join('');
       }
     }
@@ -6883,63 +8004,102 @@
       const el = document.getElementById('dash-insight-list');
       if (!el) return;
 
-      const thisYearStr = String(new Date().getFullYear()).slice(-2) + '년';
-      const lastYearStr = String(new Date().getFullYear() - 1).slice(-2) + '년';
-      const target = PPM_DATA.target;
+      // ★ kpi-year / kpi-month 필터 연동
+      const kpiYear = document.getElementById('kpi-year')?.value || '';
+      const kpiMonth = document.getElementById('kpi-month')?.value || '';
+
+      // 기준 년도 결정: 필터 선택 년도 우선, 없으면 최신 년도
+      let baseYear;
+      if (kpiYear) {
+        let ky = parseInt(kpiYear.replace('년', ''));
+        baseYear = ky < 100 ? 2000 + ky : ky;
+      } else {
+        const years = records.map(r => parseInt(r.year)).filter(Boolean);
+        baseYear = (years.length > 0) ? Math.max(...years) : new Date().getFullYear();
+      }
+      const thisYearStr = String(baseYear).slice(-2) + '년';
+      const lastYearStr = String(baseYear - 1).slice(-2) + '년';
+      const target = 220; // PPM 목표
+
+      // ★ 필터 적용된 레코드 (인사이트 집계용)
+      const filteredRec = records.filter(function (r) {
+        if (kpiYear && r.year !== kpiYear) return false;
+        if (kpiMonth && r.month !== kpiMonth) return false;
+        return true;
+      });
+
+      // 필터 라벨 문자열
+      const filterLabel = (kpiYear || thisYearStr) + (kpiMonth ? ' ' + kpiMonth : '');
 
       const tags = [];
 
-      // 1. 올해 PPM vs 목표
-      const latestPpm26 = PPM_DATA.y26.avg.filter(function (v) { return v !== null; });
-      if (latestPpm26.length) {
-        const cur = latestPpm26[latestPpm26.length - 1];
-        if (cur <= target) {
-          tags.push({ cls: 'ok', text: '✅ 올해 PPM ' + cur.toFixed(0) + ' — 목표 달성' });
-        } else {
-          tags.push({ cls: 'danger', text: '🚨 올해 PPM ' + cur.toFixed(0) + ' — 목표 초과 (목표 ' + target + ')' });
+      // 데이터가 전혀 없으면 안내 메시지
+      if (records.length === 0) {
+        el.innerHTML = '<span class="insight-tag">등록된 데이터가 없습니다.</span>';
+        return;
+      }
+
+      // 1. 필터 기간 총 가공불량
+      const totalMach = filteredRec.reduce(function (s, r) { return s + (r.machQty || 0); }, 0);
+      tags.push({ cls: '', text: '📊 ' + filterLabel + ' 가공불량 합계: ' + totalMach.toLocaleString() + '개' });
+
+      // 2. 올해(또는 선택년도) PPM vs 목표 — 월 필터 없을 때만 표시
+      if (!kpiMonth) {
+        // calcYearlyPpm()으로 동적 계산 (PPM_DATA 전역 객체 불필요)
+        const thisYearPpmData = calcYearlyPpm(thisYearStr);
+        const latestPpm26 = thisYearPpmData.avg.filter(function (v) { return v !== null; });
+        if (latestPpm26.length) {
+          const cur = latestPpm26[latestPpm26.length - 1];
+          if (cur <= target) {
+            tags.push({ cls: 'ok', text: '✅ ' + thisYearStr + ' PPM ' + cur.toFixed(0) + ' — 목표 달성' });
+          } else {
+            tags.push({ cls: 'danger', text: '🚨 ' + thisYearStr + ' PPM ' + cur.toFixed(0) + ' — 목표 초과 (목표 ' + target + ')' });
+          }
+        }
+
+        // 3. 전년 대비 PPM 개선/악화
+        const lastYearPpmData = calcYearlyPpm(lastYearStr);
+        const latestPpm25 = lastYearPpmData.avg.filter(function (v) { return v !== null; });
+        if (latestPpm26.length && latestPpm25.length) {
+          const diff = latestPpm26[latestPpm26.length - 1] - latestPpm25[latestPpm25.length - 1];
+          if (diff < 0) {
+            tags.push({ cls: 'ok', text: '📉 전년比 PPM ' + Math.abs(diff).toFixed(0) + ' 개선' });
+          } else if (diff > 0) {
+            tags.push({ cls: 'warn', text: '📈 전년比 PPM +' + diff.toFixed(0) + ' 악화' });
+          }
         }
       }
 
-      // 2. 전년 대비 PPM 개선/악화
-      const latestPpm25 = PPM_DATA.y25.avg.filter(function (v) { return v !== null; });
-      if (latestPpm26.length && latestPpm25.length) {
-        const diff = latestPpm26[latestPpm26.length - 1] - latestPpm25[latestPpm25.length - 1];
-        if (diff < 0) {
-          tags.push({ cls: 'ok', text: '📉 전년比 PPM ' + Math.abs(diff).toFixed(0) + ' 개선' });
-        } else if (diff > 0) {
-          tags.push({ cls: 'warn', text: '📈 전년比 PPM +' + diff.toFixed(0) + ' 악화' });
-        }
-      }
-
-      // 3. 최다 불량 공정
+      // 4. 최다 불량 공정 (필터 적용)
       const procMap = {};
-      records.filter(function (r) { return r.year === thisYearStr; }).forEach(function (r) {
+      filteredRec.forEach(function (r) {
         const k = r.defectProc || '미입력';
         procMap[k] = (procMap[k] || 0) + (r.machQty || 0);
       });
       const topProc = Object.entries(procMap).sort(function (a, b) { return b[1] - a[1]; })[0];
       if (topProc) tags.push({ cls: 'warn', text: '⚙️ 최다불량 공정: ' + topProc[0] + '공정 (' + topProc[1].toLocaleString() + '개)' });
 
-      // 4. 가장 많이 발생한 불량 유형
+      // 5. 가장 많이 발생한 불량 유형 (필터 적용)
       const typeMap = {};
-      records.filter(function (r) { return r.year === thisYearStr; }).forEach(function (r) {
+      filteredRec.forEach(function (r) {
         const k = (r.defectCode || '?') + ' ' + (r.defectContent || '');
         typeMap[k] = (typeMap[k] || 0) + (r.machQty || 0);
       });
       const topType = Object.entries(typeMap).sort(function (a, b) { return b[1] - a[1]; })[0];
       if (topType) tags.push({ cls: 'warn', text: '🏷 최다불량 유형: ' + topType[0].trim().slice(0, 20) });
 
-      // 5. 데이터 건수
-      const thisYearCnt = records.filter(function (r) { return r.year === thisYearStr; }).length;
-      tags.push({ cls: '', text: '📋 ' + thisYearStr + ' 등록 건수: ' + thisYearCnt.toLocaleString() + '건' });
+      // 6. 데이터 건수 (필터 적용)
+      tags.push({ cls: '', text: '📋 ' + filterLabel + ' 등록 건수: ' + filteredRec.length.toLocaleString() + '건' });
 
-      // 6. 월별 최다 불량 월
-      const mMap = {};
-      records.filter(function (r) { return r.year === thisYearStr; }).forEach(function (r) {
-        if (r.month) mMap[r.month] = (mMap[r.month] || 0) + (r.machQty || 0);
-      });
-      const topMonth = Object.entries(mMap).sort(function (a, b) { return b[1] - a[1]; })[0];
-      if (topMonth) tags.push({ cls: 'warn', text: '📅 최다불량 월: ' + topMonth[0] + ' (' + topMonth[1].toLocaleString() + '개)' });
+      // 7. 월별 최다 불량 월 (월 미선택 시에만)
+      if (!kpiMonth) {
+        const mMap = {};
+        filteredRec.forEach(function (r) {
+          if (r.month) mMap[r.month] = (mMap[r.month] || 0) + (r.machQty || 0);
+        });
+        const topMonth = Object.entries(mMap).sort(function (a, b) { return b[1] - a[1]; })[0];
+        if (topMonth) tags.push({ cls: 'warn', text: '📅 최다불량 월: ' + topMonth[0] + ' (' + topMonth[1].toLocaleString() + '개)' });
+      }
 
       el.innerHTML = tags.map(function (t) {
         return '<span class="insight-tag ' + (t.cls || '') + '">' + t.text + '</span>';
@@ -7405,10 +8565,17 @@
     // ── Push 전용 헬퍼 ──────────────────────────────
     async function gsPushOnly() {
       if (!_gsUrl) return null;
+      // ★ prodQty(총생산수량)도 함께 전송
+      let prodQty = {};
+      try { prodQty = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
       const res = await fetch(_gsUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'saveAll', records: JSON.parse(JSON.stringify(records)) })
+        body: JSON.stringify({
+          action: 'saveAll',
+          records: JSON.parse(JSON.stringify(records)),
+          prodQty: prodQty
+        })
       });
       if (!res.ok) throw new Error('서버 응답 오류 (HTTP ' + res.status + ')');
       return await res.json();
@@ -7428,6 +8595,22 @@
         }
       });
       return Array.from(map.values());
+    }
+
+    // ★ prodQty 병합: 같은 key(년-월)는 updatedAt 비교, 없으면 remote 우선
+    function mergeProdQty(local, remote) {
+      const merged = Object.assign({}, local);
+      Object.keys(remote).forEach(function (key) {
+        if (!merged[key]) {
+          merged[key] = remote[key];
+        } else {
+          // updatedAt 필드가 있으면 최신 데이터 우선
+          const lTs = merged[key]._updatedAt || '';
+          const rTs = remote[key]._updatedAt || '';
+          if (rTs > lTs) merged[key] = remote[key];
+        }
+      });
+      return merged;
     }
 
     // ── 전체 동기화 (헤더 [동기화] 버튼) ────────────
@@ -7452,7 +8635,14 @@
           const remote = await getRes.json();
           if (remote.ok && remote.records) {
             records = mergeByUpdated(records, remote.records);
-            await idbPutAll('records', records);  // saveRecords 후킹 우회 → 무한루프 없음
+            await idbPutAll('records', records);
+          }
+          // ★ prodQty Pull 병합
+          if (remote.ok && remote.prodQty) {
+            let localProd = {};
+            try { localProd = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+            const merged = mergeProdQty(localProd, remote.prodQty);
+            localStorage.setItem('prodQty', JSON.stringify(merged));
           }
           // STEP2: Push
           toast('⏳ Google Sheets에 데이터를 저장하는 중...', 'info');
@@ -7465,12 +8655,14 @@
           if (typeof renderListTable === 'function') renderListTable();
           if (typeof renderKpi === 'function') renderKpi();
           if (typeof updateBadges === 'function') updateBadges();
+          if (typeof renderProdLedger === 'function') renderProdLedger();
           return;
         }
         if (typeof renderRecentTable === 'function') renderRecentTable();
         if (typeof renderListTable === 'function') renderListTable();
         if (typeof renderKpi === 'function') renderKpi();
         if (typeof updateBadges === 'function') updateBadges();
+        if (typeof renderProdLedger === 'function') renderProdLedger();
       } catch (e) {
         let msg = e.message;
         if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('networkerror'))
@@ -7494,12 +8686,21 @@
         if (!data.ok) throw new Error(data.msg || '응답 오류');
         records = mergeByUpdated(records, data.records || []);
         await idbPutAll('records', records);
-        await updateStorageInfo(); // saveRecords 후킹 우회
+        // ★ prodQty Pull 병합
+        if (data.prodQty) {
+          let localProd = {};
+          try { localProd = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+          const merged = mergeProdQty(localProd, data.prodQty);
+          localStorage.setItem('prodQty', JSON.stringify(merged));
+        }
+        await updateStorageInfo();
         if (typeof renderRecentTable === 'function') renderRecentTable();
         if (typeof renderListTable === 'function') renderListTable();
         if (typeof renderKpi === 'function') renderKpi();
         if (typeof updateBadges === 'function') updateBadges();
-        toast('✅ 불러오기 완료! 부적합이력: ' + records.length + '건', 'success');
+        if (typeof renderProdLedger === 'function') renderProdLedger();
+        const prodMsg = data.prodQty ? (' / 총생산수량: ' + Object.keys(data.prodQty).length + '개월') : '';
+        toast('✅ 불러오기 완료! 부적합이력: ' + records.length + '건' + prodMsg, 'success');
       } catch (e) {
         toast('❌ 불러오기 실패: ' + e.message, 'error');
       }
@@ -7556,10 +8757,21 @@
         const res = await fetch(_gsUrl + '?action=getAll', { method: 'GET' });
         if (!res.ok) return;
         const data = await res.json();
-        if (!data.ok || !data.records || !data.records.length) return;
-        records = mergeByUpdated(records, data.records);
-        await idbPutAll('records', records);
-        await updateStorageInfo(); // saveRecords 후킹 우회
+        if (!data.ok) return;
+        // records 병합
+        if (data.records && data.records.length) {
+          records = mergeByUpdated(records, data.records);
+          await idbPutAll('records', records);
+          await updateStorageInfo();
+        }
+        // ★ prodQty 병합
+        if (data.prodQty && Object.keys(data.prodQty).length) {
+          let localProd = {};
+          try { localProd = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+          const merged = mergeProdQty(localProd, data.prodQty);
+          localStorage.setItem('prodQty', JSON.stringify(merged));
+          if (typeof renderProdLedger === 'function') renderProdLedger();
+        }
         if (typeof renderRecentTable === 'function') renderRecentTable();
         if (typeof renderListTable === 'function') renderListTable();
         if (typeof renderKpi === 'function') renderKpi();
@@ -7621,6 +8833,91 @@
         console.error('Storage info update failed:', e);
       }
     }
+
+    /* ── 인쇄 전/후: Chart.js PPM 차트 + 게이지 색상 보정 ── */
+    (function () {
+      var PRINT_DARK = '#1e293b';
+      var PRINT_MED  = '#475569';
+
+      function setPpmChartPrint(isPrint) {
+        var ppmChart = dashCharts && dashCharts['ppm'];
+        if (!ppmChart) return;
+        var opts = ppmChart.options;
+
+        // 범례 레이블
+        if (opts.plugins && opts.plugins.legend && opts.plugins.legend.labels) {
+          opts.plugins.legend.labels.color = isPrint ? PRINT_DARK : '#94a3b8';
+        }
+        // Y축 tick + grid
+        if (opts.scales && opts.scales.y) {
+          if (opts.scales.y.ticks) opts.scales.y.ticks.color = isPrint ? PRINT_DARK : '#64748b';
+          if (opts.scales.y.grid)  opts.scales.y.grid.color  = isPrint ? 'rgba(0,0,0,0.12)' : 'rgba(30,58,95,0.5)';
+        }
+        // X축 tick + grid
+        if (opts.scales && opts.scales.x) {
+          if (opts.scales.x.ticks) opts.scales.x.ticks.color = isPrint ? PRINT_DARK : '#64748b';
+          if (opts.scales.x.grid)  opts.scales.x.grid.color  = isPrint ? 'rgba(0,0,0,0.1)' : 'rgba(30,58,95,0.3)';
+        }
+
+        // dataset[1]: 올해 막대 datalabels
+        // - 인쇄 시 흰색('#ffffff') 그대로 유지 (막대 위에 올라가므로 가독성 OK)
+        // - '#e2e8f0' (밝은 회색, 흰 종이에서 희미) → PRINT_DARK 로 교체
+        var ds1 = ppmChart.data.datasets[1];
+        if (ds1 && ds1.datalabels) {
+          if (!ds1.datalabels._origColorFn && typeof ds1.datalabels.color === 'function') {
+            ds1.datalabels._origColorFn = ds1.datalabels.color;
+          }
+          if (isPrint && ds1.datalabels._origColorFn) {
+            // 인쇄 시 올해 막대 모든 레이블 → 흰색 (막대 위에 올라가므로 가독성 OK)
+            ds1.datalabels.color = '#ffffff';
+          } else if (!isPrint && ds1.datalabels._origColorFn) {
+            ds1.datalabels.color = ds1.datalabels._origColorFn;
+          }
+        }
+
+        // dataset[2]: 작년 누계 라인 색상 (#94a3b8 → 진한 회색)
+        var ds2 = ppmChart.data.datasets[2];
+        if (ds2) {
+          ds2._origBC = ds2._origBC || ds2.borderColor;
+          ds2.borderColor    = isPrint ? '#374151' : ds2._origBC;
+          ds2.backgroundColor = isPrint ? '#374151' : ds2._origBC;
+        }
+
+        // dataset[3]: 올해 누계 라인 색상 (#38bdf8 → 진한 파란색)
+        var ds3 = ppmChart.data.datasets[3];
+        if (ds3) {
+          ds3._origBC = ds3._origBC || ds3.borderColor;
+          ds3.borderColor    = isPrint ? '#0369a1' : ds3._origBC;
+          ds3.backgroundColor = isPrint ? '#0369a1' : ds3._origBC;
+          if (ds3.datalabels && typeof ds3.datalabels.color === 'string') {
+            ds3.datalabels._origColor = ds3.datalabels._origColor || ds3.datalabels.color;
+            ds3.datalabels.color = isPrint ? '#0369a1' : ds3.datalabels._origColor;
+          }
+        }
+
+        ppmChart.update('none');
+      }
+
+      window.addEventListener('beforeprint', function () {
+        setPpmChartPrint(true);
+
+        // 게이지 SVG 중앙 수치 텍스트
+        var gTxt = document.getElementById('gauge-pct-text');
+        if (gTxt) { gTxt._origFill = gTxt.getAttribute('fill'); gTxt.setAttribute('fill', '#0f172a'); }
+        var gPeriod = document.getElementById('gauge-period-text');
+        if (gPeriod) { gPeriod._origFill = gPeriod.getAttribute('fill'); gPeriod.setAttribute('fill', '#1e293b'); }
+      });
+
+      window.addEventListener('afterprint', function () {
+        setPpmChartPrint(false);
+
+        // 게이지 SVG 원복
+        var gTxt = document.getElementById('gauge-pct-text');
+        if (gTxt && gTxt._origFill != null) gTxt.setAttribute('fill', gTxt._origFill);
+        var gPeriod = document.getElementById('gauge-period-text');
+        if (gPeriod && gPeriod._origFill != null) gPeriod.setAttribute('fill', gPeriod._origFill);
+      });
+    })();
   </script>
 </body>
 
