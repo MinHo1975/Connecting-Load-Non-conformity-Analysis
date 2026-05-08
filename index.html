@@ -9054,8 +9054,65 @@ function renderTypeChart() {
         ppmChart.update('none');
       }
 
+      // ── 레이더 차트 인쇄 색상 보정 ──────────────────
+      function setRadarChartPrint(isPrint) {
+        var radarChart = dashCharts && dashCharts['radar'];
+        if (!radarChart) return;
+        var opts = radarChart.options;
+
+        // r축 grid / angleLines / ticks / pointLabels
+        if (opts.scales && opts.scales.r) {
+          var r = opts.scales.r;
+          if (r.grid)        r.grid.color        = isPrint ? 'rgba(0,0,0,0.18)' : 'rgba(30,58,95,0.6)';
+          if (r.angleLines)  r.angleLines.color   = isPrint ? 'rgba(0,0,0,0.18)' : 'rgba(30,58,95,0.5)';
+          if (r.ticks)       r.ticks.color        = isPrint ? '#334155'           : '#64748b';
+          if (r.pointLabels) r.pointLabels.color  = isPrint ? '#0f172a'           : '#94a3b8';
+        }
+        // 범례
+        if (opts.plugins && opts.plugins.legend && opts.plugins.legend.labels) {
+          opts.plugins.legend.labels.color = isPrint ? '#0f172a' : '#94a3b8';
+        }
+
+        // dataset[0]: 전년(회색) → 인쇄 시 진한 색으로 교체
+        var ds0 = radarChart.data.datasets[0];
+        if (ds0) {
+          ds0._origBC  = ds0._origBC  || ds0.borderColor;
+          ds0._origBgC = ds0._origBgC || ds0.backgroundColor;
+          ds0._origPC  = ds0._origPC  || ds0.pointBackgroundColor;
+          if (isPrint) {
+            ds0.borderColor          = '#dc2626';          // 선명한 빨간색
+            ds0.backgroundColor      = 'rgba(220,38,38,0.10)';
+            ds0.pointBackgroundColor = '#dc2626';
+          } else {
+            ds0.borderColor          = ds0._origBC;
+            ds0.backgroundColor      = ds0._origBgC;
+            ds0.pointBackgroundColor = ds0._origPC;
+          }
+        }
+
+        // dataset[1]: 올해(하늘색) → 인쇄 시 진한 파란색으로 교체
+        var ds1 = radarChart.data.datasets[1];
+        if (ds1) {
+          ds1._origBC  = ds1._origBC  || ds1.borderColor;
+          ds1._origBgC = ds1._origBgC || ds1.backgroundColor;
+          ds1._origPC  = ds1._origPC  || ds1.pointBackgroundColor;
+          if (isPrint) {
+            ds1.borderColor          = '#1d4ed8';          // 진한 파란색
+            ds1.backgroundColor      = 'rgba(29,78,216,0.12)';
+            ds1.pointBackgroundColor = '#1d4ed8';
+          } else {
+            ds1.borderColor          = ds1._origBC;
+            ds1.backgroundColor      = ds1._origBgC;
+            ds1.pointBackgroundColor = ds1._origPC;
+          }
+        }
+
+        radarChart.update('none');
+      }
+
       window.addEventListener('beforeprint', function () {
         setPpmChartPrint(true);
+        setRadarChartPrint(true);   // ★ 레이더 차트 인쇄 색상 적용
 
         // 게이지 SVG 중앙 수치 텍스트
         var gTxt = document.getElementById('gauge-pct-text');
@@ -9066,6 +9123,7 @@ function renderTypeChart() {
 
       window.addEventListener('afterprint', function () {
         setPpmChartPrint(false);
+        setRadarChartPrint(false);  // ★ 레이더 차트 원래 색상 복원
 
         // 게이지 SVG 원복
         var gTxt = document.getElementById('gauge-pct-text');
