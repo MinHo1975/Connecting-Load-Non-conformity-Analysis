@@ -4237,7 +4237,7 @@ function handleRequest(e) {
       var prodQty = {};
       if (prodRows.length > 1) {
         for (var pi = 1; pi < prodRows.length; pi++) {
-          var pKey = prodRows[pi][0];
+          var pKey = String(prodRows[pi][0] || '').trim(); // ★ Sheets 자동 변환 방지
           var pData = prodRows[pi][1];
           var pTs   = prodRows[pi][2] || '';
           if (!pKey) continue;
@@ -4274,12 +4274,13 @@ function handleRequest(e) {
         var prodKeys = Object.keys(bodyData.prodQty);
         if (prodKeys.length > 0) {
           var prodVals = prodKeys.map(function(k) {
+            var kStr = String(k).trim(); // ★ key를 반드시 문자열로 변환
             var entry = bodyData.prodQty[k];
             var ts = entry._updatedAt || new Date().toISOString();
             // _updatedAt 필드는 data JSON에서 제외하여 저장
             var dataCopy = JSON.parse(JSON.stringify(entry));
             delete dataCopy._updatedAt;
-            return [k, JSON.stringify(dataCopy), ts];
+            return [kStr, JSON.stringify(dataCopy), ts];
           });
           prodSheet.getRange(2, 1, prodVals.length, 3).setValues(prodVals);
         }
@@ -4753,7 +4754,8 @@ function doPost(e) { return handleRequest(e); }</div>
       const fYear = document.getElementById('prod-filter-year').value;
       const fMonth = document.getElementById('prod-filter-month').value;
 
-      let keys = Object.keys(store).sort().reverse();
+      // ★ YYYY-MM 정상 키만 사용 (Sheets 동기화로 깨진 중복 키 제외)
+      let keys = Object.keys(store).filter(k => /^\d{4}-\d{2}$/.test(String(k))).sort().reverse();
 
       // 필터 년도 목록 채우기
       const yearsSet = new Set();
@@ -4770,9 +4772,10 @@ function doPost(e) { return handleRequest(e); }</div>
       if (fMonth) keys = keys.filter(k => parseInt(k.split('-')[1]) === parseInt(fMonth));
 
       // 제목 업데이트
-      // 생산수량 총 건수 (단순 월 개수가 아닌, 등록된 모든 공정별 항목 합계)
-      const totalEntries = Object.keys(store).reduce((acc, month) => {
-        return acc + Object.keys(store[month]).length;
+      // 생산수량 총 건수: YYYY-MM 정상 키만 합산 (중복 키 제외)
+      const totalEntries = Object.keys(store).reduce((acc, k) => {
+        if (!/^\d{4}-\d{2}$/.test(String(k))) return acc;
+        return acc + Object.keys(store[k]).filter(f => f !== '_updatedAt').length;
       }, 0);
 
       const titleEl = document.getElementById('prod-ledger-title');
@@ -4796,7 +4799,12 @@ function doPost(e) { return handleRequest(e); }</div>
       }
 
       const html = keys.map(k => {
-        const [y, m] = k.split('-');
+        // ★ Sheets에서 Date 객체로 변환된 키 방어: "YYYY-MM" 형식만 허용
+        const kStr = String(k);
+        const kMatch = kStr.match(/(\d{2,4})-(\d{1,2})/);
+        const y = kMatch ? kMatch[1] : '';
+        const m = kMatch ? kMatch[2] : '';
+        if (!y || !m) return ''; // 키 형식 불량 → 건너뜀
         const sy = String(parseInt(y)).slice(-2);
         const ymText = sy + '년 ' + parseInt(m) + '월';
 
@@ -4844,7 +4852,7 @@ function doPost(e) { return handleRequest(e); }</div>
             <tbody>${rows}</tbody>
           </table>
         </div>`;
-      }).join('');
+      }).filter(Boolean).join(''); // ★ 키 불량 항목(빈 문자열) 제거
       wrap.innerHTML = html;
       updateBadges(); // 렌더링 시 배지 동기화
     }
@@ -6159,8 +6167,10 @@ if (typeMonthEl) {
       try {
         const prodStore = JSON.parse(localStorage.getItem('prodQty') || '{}');
         let totalProdEntries = 0;
-        Object.keys(prodStore).forEach(month => {
-          totalProdEntries += Object.keys(prodStore[month]).length;
+        Object.keys(prodStore).forEach(k => {
+          // ★ "YYYY-MM" 정상 키만 카운트 (Sheets 동기화로 깨진 중복 키 제외)
+          if (!/^\d{4}-\d{2}$/.test(String(k))) return;
+          totalProdEntries += Object.keys(prodStore[k]).filter(f => f !== '_updatedAt').length;
         });
         const prodBadge = document.getElementById('badge-production');
         if (prodBadge) {
@@ -6826,8 +6836,14 @@ if (typeMonthEl) {
       const defectArr = new Array(12).fill(0);
       const prodArr = new Array(12).fill(0);
 
-      // 1. 가공불량 수량 합산 (이력대장 records 연동)
-      records.filter(r => r.year === yearStr).forEach(r => {
+      // ★ yearStr 정규화: "26년" → "2026년", "2026년" → "2026년" (4자리 통일)
+      let yNum = parseInt(String(yearStr).replace('년', ''));
+      if (yNum < 100) yNum += 2000;
+      const yearStr4 = yNum + '년'; // 항상 4자리 ex) "2026년"
+      const yearStr2 = String(yNum).slice(-2) + '년'; // 2자리 ex) "26년"
+
+      // 1. 가공불량 수량 합산: r.year가 2자리/4자리 모두 매칭
+      records.filter(r => r.year === yearStr4 || r.year === yearStr2).forEach(r => {
         if (r.month) {
           const idx = parseInt(r.month) - 1;
           if (idx >= 0 && idx < 12) defectArr[idx] += (r.machQty || 0);
@@ -6837,17 +6853,34 @@ if (typeMonthEl) {
       // 2. 총생산수량 합산 (prodQty localStorage 연동)
       let prodStore = {};
       try { prodStore = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
-      let yNum = parseInt(yearStr);
-      if (yNum < 100) yNum += 2000;
+      // ★ 정상 키(YYYY-MM)를 우선 사용, 깨진 키는 정상 키 없을 때만 보조 사용
+      const normalizedStore = {};
+      // 1단계: 정상 키만 먼저 등록
+      Object.keys(prodStore).forEach(k => {
+        if (/^\d{4}-\d{2}$/.test(String(k))) {
+          normalizedStore[k] = prodStore[k];
+        }
+      });
+      // 2단계: 깨진 키는 정상 키가 없을 때만 보정해서 등록
+      Object.keys(prodStore).forEach(k => {
+        if (/^\d{4}-\d{2}$/.test(String(k))) return; // 정상 키는 건너뜀
+        const kMatch = String(k).match(/(\d{2,4})-(\d{1,2})/);
+        if (!kMatch) return;
+        let ky = parseInt(kMatch[1]);
+        if (ky < 100) ky += 2000;
+        const normalKey = ky + '-' + String(parseInt(kMatch[2])).padStart(2, '0');
+        if (!normalizedStore[normalKey]) normalizedStore[normalKey] = prodStore[k]; // 정상 키 없을 때만
+      });
 
       for (let m = 1; m <= 12; m++) {
         const key = yNum + '-' + String(m).padStart(2, '0');
-        const mData = prodStore[key];
+        const mData = normalizedStore[key];
         if (mData) {
           let mTotal = 0;
-          Object.values(mData).forEach(p => {
+          Object.entries(mData).forEach(([field, p]) => {
+            if (field === '_updatedAt') return; // ★ 타임스탬프 필드 제외
             if (typeof p === 'object' && p !== null) mTotal += (p.qty || 0);
-            else mTotal += (p || 0);
+            else if (typeof p === 'number') mTotal += p;
           });
           prodArr[m - 1] = mTotal;
         }
@@ -6918,15 +6951,27 @@ if (typeMonthEl) {
         let ky = parseInt(kpiYear.replace('년', ''));
         baseYear = ky < 100 ? 2000 + ky : ky;
       } else {
-        const years = records.map(r => parseInt(r.year)).filter(Boolean);
+        // ★ r.year가 "26년"(2자리) 형식일 수 있으므로 4자리로 정규화 후 수집
+        const years = records.map(r => {
+          var yy = parseInt(String(r.year || '').replace('년', ''));
+          if (isNaN(yy) || yy === 0) return null;
+          return yy < 100 ? 2000 + yy : yy;
+        }).filter(Boolean);
         let prodStore = {};
         try { prodStore = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
-        Object.keys(prodStore).forEach(k => years.push(parseInt(k.split('-')[0])));
-        baseYear = (years.length > 0) ? Math.max(...years) : new Date().getFullYear();
+        // ★ prodQty 키(YYYY-MM) 파싱 시 NaN 방어
+        Object.keys(prodStore).forEach(k => {
+          var yk = parseInt((k.split('-')[0]) || '');
+          if (!isNaN(yk) && yk > 0) {
+            years.push(yk < 100 ? 2000 + yk : yk);
+          }
+        });
+        var validYears2 = years.filter(y => !isNaN(y) && y > 2000);
+        baseYear = (validYears2.length > 0) ? Math.max(...validYears2) : new Date().getFullYear();
       }
 
-      const thisYearStr = String(baseYear).slice(-2) + '년';
-      const lastYearStr = String(baseYear - 1).slice(-2) + '년';
+      const thisYearStr = String(baseYear) + '년'; // ★ 4자리 연도
+      const lastYearStr = String(baseYear - 1) + '년'; // ★ 4자리 연도
 
       const ppmDataThis = calcYearlyPpm(thisYearStr);
       const ppmDataLast = calcYearlyPpm(lastYearStr);
@@ -6990,14 +7035,26 @@ if (typeMonthEl) {
         var ky = parseInt(kpiYear.replace('년', ''));
         baseYear = ky < 100 ? 2000 + ky : ky;
       } else {
-        const years = records.map(r => parseInt(r.year)).filter(Boolean);
+        // ★ r.year가 "26년"(2자리) 형식일 수 있으므로 4자리로 정규화 후 수집
+        const years = records.map(r => {
+          var yy = parseInt(String(r.year || '').replace('년', ''));
+          if (isNaN(yy) || yy === 0) return null;
+          return yy < 100 ? 2000 + yy : yy;
+        }).filter(Boolean);
         let prodStore = {};
         try { prodStore = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
-        Object.keys(prodStore).forEach(k => years.push(parseInt(k.split('-')[0])));
-        baseYear = (years.length > 0) ? Math.max(...years) : new Date().getFullYear();
+        // ★ prodQty 키(YYYY-MM) 파싱 시 NaN 방어
+        Object.keys(prodStore).forEach(k => {
+          var yk = parseInt((k.split('-')[0]) || '');
+          if (!isNaN(yk) && yk > 0) {
+            years.push(yk < 100 ? 2000 + yk : yk);
+          }
+        });
+        var validYears = years.filter(y => !isNaN(y) && y > 2000);
+        baseYear = (validYears.length > 0) ? Math.max(...validYears) : new Date().getFullYear();
       }
-      const thisYearStr = String(baseYear).slice(-2) + '년';
-      const lastYearStr = String(baseYear - 1).slice(-2) + '년';
+      const thisYearStr = String(baseYear) + '년'; // ★ 4자리 연도
+      const lastYearStr = String(baseYear - 1) + '년'; // ★ 4자리 연도
 
       // 선택 월 결정: 버튼 선택 우선, 없으면 kpi-month 필터 사용
       const kpiMonth = document.getElementById('kpi-month')?.value || '';
@@ -7656,11 +7713,19 @@ function renderTypeChart() {
         var gky = parseInt(kpiYear.replace('년', ''));
         gBaseYear = gky < 100 ? 2000 + gky : gky;
       } else {
-        const gyears = records.map(r => parseInt(r.year)).filter(Boolean);
+        const gyears = records.map(r => {
+          var yy = parseInt(String(r.year || '').replace('년', ''));
+          if (isNaN(yy) || yy === 0) return null;
+          return yy < 100 ? 2000 + yy : yy;
+        }).filter(Boolean);
         let gprodStore = {};
         try { gprodStore = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
-        Object.keys(gprodStore).forEach(k => gyears.push(parseInt(k.split('-')[0])));
-        gBaseYear = (gyears.length > 0) ? Math.max(...gyears) : new Date().getFullYear();
+        Object.keys(gprodStore).forEach(k => {
+          var yk = parseInt((k.split('-')[0]) || '');
+          if (!isNaN(yk) && yk > 0) gyears.push(yk < 100 ? 2000 + yk : yk);
+        });
+        var gValidYears = gyears.filter(y => !isNaN(y) && y > 2000);
+        gBaseYear = (gValidYears.length > 0) ? Math.max(...gValidYears) : new Date().getFullYear();
       }
       const gThisYearStr = String(gBaseYear).slice(-2) + '년';
       const gPpmData = calcYearlyPpm(gThisYearStr);
@@ -8014,11 +8079,16 @@ function renderTypeChart() {
         let ky = parseInt(kpiYear.replace('년', ''));
         baseYear = ky < 100 ? 2000 + ky : ky;
       } else {
-        const years = records.map(r => parseInt(r.year)).filter(Boolean);
-        baseYear = (years.length > 0) ? Math.max(...years) : new Date().getFullYear();
+        const years = records.map(r => {
+          var yy = parseInt(String(r.year || '').replace('년', ''));
+          if (isNaN(yy) || yy === 0) return null;
+          return yy < 100 ? 2000 + yy : yy;
+        }).filter(Boolean);
+        var validYears3 = years.filter(y => !isNaN(y) && y > 2000);
+        baseYear = (validYears3.length > 0) ? Math.max(...validYears3) : new Date().getFullYear();
       }
-      const thisYearStr = String(baseYear).slice(-2) + '년';
-      const lastYearStr = String(baseYear - 1).slice(-2) + '년';
+      const thisYearStr = String(baseYear) + '년'; // ★ 4자리 연도
+      const lastYearStr = String(baseYear - 1) + '년'; // ★ 4자리 연도
       const target = 220; // PPM 목표
 
       // ★ 필터 적용된 레코드 (인사이트 집계용)
@@ -8425,7 +8495,25 @@ function renderTypeChart() {
     }
 
     // ★ 앱 로드 시 인증 시스템 먼저 시작
+    // ★ prodQty localStorage 깨진 키 자동 정리 (YYYY-MM 아닌 키 제거)
+    function cleanProdQtyKeys() {
+      try {
+        const store = JSON.parse(localStorage.getItem('prodQty') || '{}');
+        const cleaned = {};
+        Object.keys(store).forEach(k => {
+          if (/^\d{4}-\d{2}$/.test(String(k))) {
+            cleaned[k] = store[k];
+          }
+        });
+        if (Object.keys(cleaned).length !== Object.keys(store).length) {
+          localStorage.setItem('prodQty', JSON.stringify(cleaned));
+          console.log('[cleanProdQtyKeys] 깨진 키 정리 완료:', Object.keys(store).length, '→', Object.keys(cleaned).length);
+        }
+      } catch (e) { console.warn('cleanProdQtyKeys error:', e); }
+    }
+
     window.onload = () => {
+      cleanProdQtyKeys(); // ★ 앱 시작 시 깨진 키 자동 정리
       authInit();
     };
 
@@ -8568,13 +8656,18 @@ function renderTypeChart() {
       // ★ prodQty(총생산수량)도 함께 전송
       let prodQty = {};
       try { prodQty = JSON.parse(localStorage.getItem('prodQty') || '{}'); } catch (e) { }
+      // ★ 전송 전 정상 키(YYYY-MM)만 필터링 - 깨진 키가 Sheets에 저장되는 것 차단
+      const prodQtyClean = {};
+      Object.keys(prodQty).forEach(k => {
+        if (/^\d{4}-\d{2}$/.test(String(k))) prodQtyClean[k] = prodQty[k];
+      });
       const res = await fetch(_gsUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           action: 'saveAll',
           records: JSON.parse(JSON.stringify(records)),
-          prodQty: prodQty
+          prodQty: prodQtyClean  // ★ 정상 키만 전송
         })
       });
       if (!res.ok) throw new Error('서버 응답 오류 (HTTP ' + res.status + ')');
