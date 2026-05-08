@@ -8546,6 +8546,7 @@ function renderTypeChart() {
     let _saveDebounceTimer = null;
     let _deleteDebounceTimer = null;
     let _gsAutoSyncRunning = false;
+    let _gsInitialPulling = false; // ★ 초기 Pull 진행 중 플래그 — Push 차단용
 
     // ── 설정 불러오기 ───────────────────────────────
     function gsLoadSettings() {
@@ -8623,9 +8624,13 @@ function renderTypeChart() {
       localStorage.setItem(GS_KEY, url);
       _gsUrl = url; _gsEnabled = true;
       gsUpdateUI();
-      toast('✅ Google Sheets 연동이 활성화되었습니다! "동기화" 버튼으로 데이터를 업로드하세요.', 'success');
+      toast('✅ Google Sheets 연동 활성화! 기존 데이터를 불러오는 중...', 'success');
       closeModal('gs-modal');
-      setTimeout(gsInitialPull, 300);
+      // ★ Pull 완료 후 렌더링 (Pull 중 _gsInitialPulling=true 로 Push 자동 차단됨)
+      gsInitialPull().then(function() {
+        if (typeof renderProdLedger === 'function') renderProdLedger();
+        toast('✅ Google Sheets 데이터 불러오기 완료!', 'success');
+      });
     }
 
     // ── 연동 해제 ───────────────────────────────────
@@ -8813,6 +8818,7 @@ function renderTypeChart() {
     // saveRecords() 후킹 없이 Push만 수행 → 무한루프/되살아남 완전 차단
     function gsAutoSync() {
       if (!_gsEnabled || !_gsUrl) return;
+      if (_gsInitialPulling) return; // ★ 초기 Pull 진행 중엔 Push 차단
       if (_saveDebounceTimer) clearTimeout(_saveDebounceTimer);
       _saveDebounceTimer = setTimeout(async function () {
         _saveDebounceTimer = null;
@@ -8856,6 +8862,7 @@ function renderTypeChart() {
       if (!_gsEnabled || !_gsUrl) return;
       const guardTs = parseInt(localStorage.getItem(GS_DELETE_GUARD_KEY) || '0');
       if ((Date.now() - guardTs) < GS_DELETE_GUARD_MS) return;
+      _gsInitialPulling = true; // ★ Pull 시작 — 이 기간 동안 gsAutoSync(Push) 차단
       try {
         const res = await fetch(_gsUrl + '?action=getAll', { method: 'GET' });
         if (!res.ok) return;
@@ -8880,6 +8887,7 @@ function renderTypeChart() {
         if (typeof renderKpi === 'function') renderKpi();
         if (typeof updateBadges === 'function') updateBadges();
       } catch (e) { console.warn('초기 Pull 실패:', e.message); }
+      finally { _gsInitialPulling = false; } // ★ Pull 완료 — Push 허용 재개
     }
 
     // ── saveRecords 후킹: 저장마다 Push ─────────────
